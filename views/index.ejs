@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Generateur d'etiquettes — DecoShop Toulouse</title>
+  <title>Generateur d'affiches — DecoShop Toulouse</title>
   <!-- Favicons : .ico DecoShop officiel + PNG pour retina / iOS -->
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.png" />
@@ -20,23 +20,21 @@
 
   <link rel="stylesheet" href="/styles.css" />
 
-  <!-- @page dynamique : remplace par JS selon l'orientation choisie. -->
-  <style id="pageStyle">@page { size: A4 portrait; margin: 0; }</style>
+  <!-- @page : toujours A4 paysage, marges nulles. -->
+  <style>@page { size: A4 landscape; margin: 0; }</style>
 </head>
 <body>
 
   <%- include('partials/header') %>
 
   <!-- ====================================================== -->
-  <!-- LAYOUT PRINCIPAL : 3 colonnes                           -->
+  <!-- LAYOUT PRINCIPAL : 2 colonnes (form | apercu A4)        -->
   <!-- ====================================================== -->
   <main class="app-grid no-print">
     <%- include('partials/form') %>
     <%- include('partials/preview') %>
-    <%- include('partials/sheet') %>
   </main>
 
-  <%- include('partials/print-area') %>
   <%- include('partials/label-template') %>
 
   <script src="/app.js"></script>

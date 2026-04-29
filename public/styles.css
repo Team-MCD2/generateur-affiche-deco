@@ -1,95 +1,57 @@
 /* ============================================================
-   DecoShop — Generateur d'etiquettes
-   DA officielle reprise du theme Shopify :
-   - Navy   #1E3A8A  (couleur principale)
-   - Yellow #FACC15  (accent)
-   - Cream  #FAF7F0  (fond doux)
-   - Ink    #0F172A  (texte)
-   - Polices : Playfair Display (titres) + DM Sans (texte)
+   DecoShop — Generateur d'affiche A4 paysage
+   Direction artistique : navy (#1E3A8A) + jaune solaire
+   (#FACC15) sur fond creme (#FAF7F0). Editorial : Playfair
+   Display pour la voix forte, DM Sans pour le rationnel.
    ============================================================ */
 
-:root {
-  --navy:        #1E3A8A;
-  --navy-700:    #17306f;
-  --navy-50:     #eef2fb;
-  --yellow:      #FACC15;
-  --yellow-600:  #e0b505;
-  --cream:       #FAF7F0;
-  --ink:         #0F172A;
-  --muted:       #64748B;
-  --line:        #E5E7EB;
-  --bg:          #ffffff;
-  --danger:      #c0392b;
+/* ----- Reset doux + variables ------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
 
+:root {
+  /* Palette */
+  --navy:        #1E3A8A;
+  --navy-700:    #1d3678;
+  --navy-50:     #eaf0fb;
+  --yellow:      #FACC15;
+  --yellow-600:  #eab308;
+  --cream:       #FAF7F0;
+  --cream-100:   #f3edd9;
+  --ink:         #0F172A;
+  --line:        #e4e9f2;
+  --muted:       #64748b;
+  --danger:      #dc2626;
+  --danger-700:  #b91c1c;
+  --white:       #ffffff;
+
+  /* Typo */
+  --font-serif:  'Playfair Display', Georgia, serif;
+  --font-sans:   'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  /* Forme */
   --radius:      14px;
   --radius-sm:   8px;
-  --shadow-sm:   0 1px 2px rgba(15, 23, 42, .06);
-  --shadow:      0 6px 20px rgba(15, 23, 42, .08);
-  --shadow-lg:   0 18px 48px rgba(15, 23, 42, .12);
-
-  /* ----- Planche A4 (constantes) ----- */
-  --paper-w: 210mm; /* largeur A4 portrait, swap par .orientation--landscape */
-  --paper-h: 297mm; /* hauteur A4 portrait */
-  --sheet-pad-x: 7mm;
-  --sheet-pad-y: 5mm;
-  --sheet-gap-x: 16mm;
-  --sheet-gap-y: 8mm;
-
-  /* ----- Grille par defaut : 6 etiquettes par planche (2 col x 3 lignes) ----- */
-  --label-cols: 2;
-  --label-rows: 3;
-
-  /* ----- Fallbacks par defaut (count-6 portrait). Les classes
-     .sheet--count-N redeclarent ces valeurs avec leurs propres
-     formules pour eviter les soucis de substitution lazy de var(). ----- */
-  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
-  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - (var(--sheet-gap-y) * 2)) / 3);
-
-  /* ----- Padding + tailles internes par defaut ----- */
-  --label-pad-x: 5mm;
-  --label-pad-y: 6mm;
-  --logo-size: 10mm;
-  --brand-name-size: 11pt;
-  --brand-city-size: 6.5pt;
-  --name-size: 13pt;
-  --ref-size: 7pt;
-  --old-size: 11pt;
-  --price-value-size: 24pt;
-  --price-currency-size: 14pt;
-  --expo-size: 11pt;
-  --footer-size: 6.5pt;
+  --shadow-sm:   0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md:   0 6px 24px rgba(15, 23, 42, 0.08);
 }
 
-/* ===== Reset minimal ===== */
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-img, svg { max-width: 100%; display: block; }
-button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
-input, select, textarea { font: inherit; color: inherit; }
-
-body {
-  font-family: 'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--ink);
+html, body {
+  margin: 0;
+  padding: 0;
   background: var(--cream);
-  font-size: 15px;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-}
-
-h1, h2, h3 {
-  font-family: 'Playfair Display', 'DM Sans', serif;
-  font-weight: 700;
-  letter-spacing: 0.2px;
   color: var(--ink);
-  margin: 0 0 0.5em;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
 }
+html, body { overflow-x: hidden; }
 
 /* ============================================================
    APP HEADER
    ============================================================ */
 .app-header {
-  background: #fff;
+  background: var(--white);
   border-bottom: 1px solid var(--line);
   padding: 1rem 1.5rem;
   display: flex;
@@ -107,10 +69,11 @@ h1, h2, h3 {
 }
 .brand__logo {
   flex: 0 0 auto;
-  width: 56px;
-  height: 56px;
+  width: 72px; height: 72px;
   border-radius: 50%;
   object-fit: cover;
+  /* Pas de fond ni de padding : le PNG est deja un cercle complet */
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 .brand__text {
   display: flex;
@@ -118,14 +81,13 @@ h1, h2, h3 {
   line-height: 1.05;
 }
 .brand__name {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 1.55rem;
   font-weight: 900;
   letter-spacing: 0.5px;
   color: var(--navy);
 }
 .brand__city {
-  font-family: 'DM Sans', sans-serif;
   font-size: 0.7rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -137,113 +99,81 @@ h1, h2, h3 {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--muted);
   background: var(--navy-50);
+  color: var(--navy);
+  font-size: 0.78rem;
+  font-weight: 600;
   padding: 0.5rem 0.9rem;
   border-radius: 999px;
   border: 1px solid #dbe4f6;
 }
-.app-header__hint svg {
-  flex: 0 0 auto;
-  color: var(--navy);
-}
+.app-header__hint svg { flex: 0 0 auto; color: var(--navy); }
 
 /* ============================================================
-   LAYOUT 3 COLONNES
+   LAYOUT 2 COLONNES
    ============================================================ */
 .app-grid {
   max-width: 1500px;
   margin: 0 auto;
   padding: 1.5rem;
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.1fr) minmax(420px, 1.4fr);
+  grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.3fr);
   gap: 1.5rem;
   align-items: start;
 }
-@media (max-width: 1100px) {
-  .app-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .panel--sheet { grid-column: 1 / -1; }
-}
-@media (max-width: 720px) {
-  .app-grid { grid-template-columns: 1fr; }
-}
 
-/* Apercu + Planche restent visibles quand on scrolle dans le formulaire
-   (qui est devenu plus long avec les options de style). Activé seulement
-   en layout desktop ; en mobile/tablette on retombe en scroll normal. */
+/* Apercu sticky en desktop : on garde l'affiche visible quand
+   on scrolle dans le formulaire. */
 @media (min-width: 1101px) {
-  .panel--preview,
-  .panel--sheet {
+  .panel--preview {
     position: sticky;
     top: 1.5rem;
     max-height: calc(100vh - 3rem);
     overflow-y: auto;
+    scrollbar-gutter: stable;
   }
-  /* Evite que la scrollbar interne de .panel--preview ne casse l'overflow:hidden
-     du .preview-wrap (qui clippe le label scale) */
-  .panel--preview { scrollbar-gutter: stable; }
 }
 
 /* ============================================================
-   PANELS
+   PANELS (form & preview)
    ============================================================ */
 .panel {
-  background: #fff;
+  background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 1.4rem 1.4rem 1.6rem;
   box-shadow: var(--shadow-sm);
+  min-width: 0;
 }
 .panel__title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 1.15rem;
   margin: 0 0 1.1rem;
   color: var(--navy);
-}
-.panel__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 1.1rem;
-}
-.panel__header .panel__title { margin: 0; }
-.panel__tools {
-  display: inline-flex;
-  gap: 0.5rem;
 }
 .panel__hint {
   margin: 0.8rem 0 0;
   font-size: 0.8rem;
   color: var(--muted);
 }
-.panel__hint--tip {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-  margin-top: 0.6rem;
-  padding: 0.6rem 0.75rem;
-  background: var(--navy-50);
-  color: var(--navy);
-  border-left: 3px solid var(--navy);
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
-  line-height: 1.4;
-}
-.panel__hint--tip svg {
-  flex: 0 0 auto;
-  margin-top: 1px;
-}
-.panel__hint--tip strong { color: var(--navy); }
 
 /* ============================================================
    FORMULAIRE
    ============================================================ */
-.form { display: flex; flex-direction: column; gap: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.35rem; }
+.form { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.form__subtitle {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  margin: 0;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+}
+.form__sep {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0.4rem 0;
+}
+.field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
 .field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -261,9 +191,10 @@ h1, h2, h3 {
   width: 100%;
   border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
-  padding: 0.65rem 0.85rem;
+  padding: 0.6rem 0.75rem;
   font-size: 0.95rem;
-  background: #fff;
+  font-family: inherit;
+  background: var(--white);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .field input:focus {
@@ -271,11 +202,7 @@ h1, h2, h3 {
   border-color: var(--navy);
   box-shadow: 0 0 0 3px var(--navy-50);
 }
-.field .hint {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-/* Cache les fleches du input number */
+.field .hint { font-size: 0.75rem; color: var(--muted); }
 .field input[type="number"]::-webkit-outer-spin-button,
 .field input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -286,50 +213,172 @@ h1, h2, h3 {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+.field__group-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.1rem;
+}
 
-/* Checkbox EXPO custom */
-.checkbox {
+/* ============================================================
+   MODE TARIFAIRE (radio cards)
+   ============================================================ */
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+.mode-option { display: block; cursor: pointer; }
+.mode-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0; height: 0;
+}
+.mode-card {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 0.7rem;
-  padding: 0.7rem 0.9rem;
-  border: 1.5px dashed var(--line);
+  gap: 0.35rem;
+  padding: 0.85rem 0.85rem 0.75rem;
+  background: var(--white);
+  border: 2px solid var(--line);
   border-radius: var(--radius-sm);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.mode-option:hover .mode-card {
+  border-color: var(--navy);
+  background: var(--navy-50);
+}
+.mode-option input:checked + .mode-card {
+  border-color: var(--navy);
+  background: var(--navy-50);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+.mode-option input:checked + .mode-card--promo {
+  border-color: var(--danger);
+  background: #fee2e2;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+.mode-option input:focus-visible + .mode-card {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+.mode-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  color: var(--navy);
+}
+.mode-option input:checked + .mode-card--promo .mode-card__icon { color: var(--danger); }
+.mode-card__icon svg { width: 18px; height: 18px; }
+.mode-card__label {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.mode-card__hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   CHECKBOX (Modele d'exposition)
+   ============================================================ */
+.checkbox {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.7rem;
   cursor: pointer;
+  padding: 0.65rem 0.75rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--white);
   transition: border-color 0.15s, background 0.15s;
 }
 .checkbox:hover { border-color: var(--navy); background: var(--navy-50); }
 .checkbox input { position: absolute; opacity: 0; pointer-events: none; }
 .checkbox__box {
-  flex: 0 0 auto;
   width: 22px; height: 22px;
   border: 2px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 5px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: var(--white);
   color: transparent;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
+.checkbox__box svg { width: 14px; height: 14px; }
 .checkbox input:checked + .checkbox__box {
-  background: var(--yellow);
-  border-color: var(--yellow);
-  color: var(--ink);
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--white);
 }
-.checkbox__label { display: flex; flex-direction: column; gap: 0.15rem; }
-.checkbox__label strong { font-weight: 700; font-size: 0.92rem; }
-.checkbox__label small { color: var(--muted); font-size: 0.78rem; line-height: 1.4; }
 .checkbox input:focus-visible + .checkbox__box {
   outline: 2px solid var(--navy);
   outline-offset: 2px;
 }
+.checkbox__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.checkbox__label strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.checkbox__label small {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 400;
+}
 
+/* ============================================================
+   BOUTONS
+   ============================================================ */
 .form__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-top: 0.4rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.1rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.05s, box-shadow 0.15s;
+  text-decoration: none;
+}
+.btn:active { transform: translateY(1px); }
+.btn--primary {
+  background: var(--navy);
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(30, 58, 138, 0.25);
+}
+.btn--primary:hover { background: var(--navy-700); }
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+}
+.btn--ghost:hover { background: var(--cream); border-color: var(--navy); }
+.btn:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
 }
 .form__error {
   margin: 0.3rem 0 0;
@@ -337,561 +386,331 @@ h1, h2, h3 {
   color: var(--danger);
   font-weight: 500;
 }
-.form__sep {
-  border: 0;
-  border-top: 1px solid var(--line);
-  margin: 0.4rem 0;
-}
-.field__group-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink);
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-/* ===== Selecteur de format de planche ===== */
-.format-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
-.format-option {
-  display: block;
-  cursor: pointer;
-}
-.format-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 0; height: 0;
-}
-.format-card {
+.form__tip {
+  margin: 0.6rem 0 0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.55rem 0.4rem 0.65rem;
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  text-align: center;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.15s;
-  position: relative;
-}
-.format-option:hover .format-card {
-  border-color: var(--navy);
+  align-items: flex-start;
+  gap: 0.55rem;
   background: var(--navy-50);
-}
-.format-option input:checked + .format-card {
-  border-color: var(--navy);
-  background: var(--navy-50);
-  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
-}
-.format-option input:checked + .format-card::after {
-  content: "";
-  position: absolute;
-  top: 4px; right: 4px;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--navy)
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>")
-    center / 10px no-repeat;
-}
-.format-option input:focus-visible + .format-card {
-  outline: 2px solid var(--navy);
-  outline-offset: 2px;
-}
-.format-card__num {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.25rem;
-  font-weight: 900;
+  border: 1px solid #dbe4f6;
   color: var(--navy);
-  line-height: 1;
-}
-.format-card__layout {
-  width: 32px;
-  height: 44px; /* ratio A4 portrait */
-  border: 1px solid var(--ink);
-  border-radius: 2px;
-  padding: 2px;
-  background: #fff;
-  display: grid;
-  gap: 1.5px;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-}
-.format-card__layout--cols-1 { grid-template-columns: 1fr; }
-.format-card__layout--cols-2 { grid-template-columns: 1fr 1fr; }
-.format-card__layout--rows-2 { grid-template-rows: 1fr 1fr; }
-.format-card__layout--rows-3 { grid-template-rows: 1fr 1fr 1fr; }
-.format-cell {
-  background: var(--yellow);
-  border-radius: 1px;
-}
-.format-card__layout--five .format-cell--centered {
-  grid-column: 1 / span 2;
-  justify-self: center;
-  width: 50%;
-}
-.format-card__text {
-  font-size: 0.65rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 700;
-}
-.format-option input:checked + .format-card .format-card__text { color: var(--navy); }
-.format-option input:checked + .format-card .format-cell { background: var(--navy); }
-
-/* ===== Selecteur d'orientation Portrait / Paysage ===== */
-.orient-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-}
-.orient-option {
-  display: block;
-  cursor: pointer;
-}
-.orient-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 0; height: 0;
-}
-.orient-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.7rem 0.5rem 0.75rem;
-  border: 1.5px solid var(--line);
+  padding: 0.55rem 0.75rem;
   border-radius: var(--radius-sm);
-  background: #fff;
-  text-align: center;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-  position: relative;
+  font-size: 0.78rem;
+  line-height: 1.4;
 }
-.orient-option:hover .orient-card {
-  border-color: var(--navy);
-  background: var(--navy-50);
-}
-.orient-option input:checked + .orient-card {
-  border-color: var(--navy);
-  background: var(--navy-50);
-  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
-}
-.orient-option input:checked + .orient-card::after {
-  content: "";
-  position: absolute;
-  top: 4px; right: 4px;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--navy)
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>")
-    center / 10px no-repeat;
-}
-.orient-option input:focus-visible + .orient-card {
-  outline: 2px solid var(--navy);
-  outline-offset: 2px;
-}
-.orient-card__icon {
-  color: var(--muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 28px;
-  transition: color 0.15s;
-}
-.orient-option input:checked + .orient-card .orient-card__icon { color: var(--navy); }
-.orient-card__label {
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--ink);
-}
-.orient-card__hint {
-  font-size: 0.7rem;
-  color: var(--muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
+.form__tip svg { flex: 0 0 auto; margin-top: 1px; }
+.form__tip strong { color: var(--navy); }
 
 /* ============================================================
-   BOUTONS
-   ============================================================ */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 0.2px;
-  transition: transform 0.15s, background 0.2s, color 0.2s, box-shadow 0.2s;
-  border: 1.5px solid transparent;
-  white-space: nowrap;
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-}
-.btn--primary {
-  background: var(--navy);
-  color: #fff;
-}
-.btn--primary:hover:not(:disabled) {
-  background: var(--navy-700);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
-}
-.btn--yellow {
-  background: var(--yellow);
-  color: var(--ink);
-}
-.btn--yellow:hover:not(:disabled) {
-  background: var(--yellow-600);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
-}
-.btn--ghost {
-  background: transparent;
-  color: var(--ink);
-  border-color: var(--line);
-}
-.btn--ghost:hover:not(:disabled) {
-  background: var(--cream);
-  border-color: var(--ink);
-}
-.btn--sm { padding: 0.5rem 0.95rem; font-size: 0.82rem; }
-
-/* ============================================================
-   APERCU LIVE
-   Le .label garde sa taille reelle (mm), on le SCALE via
-   --preview-scale (defini par format x orientation) et on
-   compense la place reservee par marges negatives pour que
-   le flex container voie la taille visible.
+   PREVIEW WRAP : conteneur 297:210, le poster est scale en JS
    ============================================================ */
 .preview-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cream);
-  border: 1px dashed #d4d8e1;
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  min-height: 380px;
-  overflow: hidden; /* securite anti-debordement pour les XL */
-  --preview-scale: 1;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 297 / 210;
+  background: var(--cream-100);
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  min-width: 0;
 }
-.preview-wrap #livePreview {
-  transform: scale(var(--preview-scale));
+.preview-wrap .poster {
+  position: absolute;
+  top: 0; left: 0;
   transform-origin: top left;
-  margin-right:  calc(var(--label-w) * (var(--preview-scale) - 1));
-  margin-bottom: calc(var(--label-h) * (var(--preview-scale) - 1));
-  transition: transform 0.2s, margin 0.2s;
+  /* transform: scale(...) applique en JS */
 }
-
-/* Echelles par format x orientation
-   (la cible est ~85mm de large max, ~120mm de haut max
-    pour rester confortable dans la colonne 'Apercu') */
-.preview-wrap.orientation--portrait.sheet--count-1 { --preview-scale: 0.40; }
-.preview-wrap.orientation--portrait.sheet--count-2 { --preview-scale: 0.43; }
-.preview-wrap.orientation--portrait.sheet--count-3 { --preview-scale: 0.43; }
-.preview-wrap.orientation--portrait.sheet--count-4 { --preview-scale: 0.85; }
-.preview-wrap.orientation--portrait.sheet--count-5,
-.preview-wrap.orientation--portrait.sheet--count-6 { --preview-scale: 0.95; }
-
-.preview-wrap.orientation--landscape.sheet--count-1 { --preview-scale: 0.30; }
-.preview-wrap.orientation--landscape.sheet--count-2 { --preview-scale: 0.55; }
-.preview-wrap.orientation--landscape.sheet--count-3 { --preview-scale: 0.55; }
-.preview-wrap.orientation--landscape.sheet--count-4 { --preview-scale: 0.65; }
-.preview-wrap.orientation--landscape.sheet--count-5,
-.preview-wrap.orientation--landscape.sheet--count-6 { --preview-scale: 0.95; }
 
 /* ============================================================
-   ETIQUETTE (l'element coeur de l'app)
-   Taille reelle : 90mm x 90mm a l'impression
-   A l'ecran, on utilise transform pour ajuster
+   AFFICHE A4 PAYSAGE — la piece centrale du generateur
+   297mm x 210mm — toutes les dimensions internes en mm pour
+   etre cohereent ecran et impression.
    ============================================================ */
-.label {
-  /* Theming par defaut, override via [data-bg] / [data-accent] */
-  --label-bg: #ffffff;
-  --label-accent: var(--navy);
-  --label-accent-fg: #ffffff;
-
+.poster {
+  width: 297mm;
+  height: 210mm;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  display: grid;
+  grid-template-rows: 32mm 1fr 22mm;
   position: relative;
-  width: var(--label-w);
-  height: var(--label-h);
-  background: var(--label-bg);
-  border: 1px solid var(--ink);
-  border-radius: 4px;
-  padding: var(--label-pad-y) var(--label-pad-x);
-  display: flex;
-  flex-direction: column;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--ink);
   overflow: hidden;
-  /* Force l'impression des couleurs et fonds */
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
+  box-shadow: var(--shadow-md);
 }
 
-/* Badge EXPO (top-right, en jaune) */
-.label__expo {
-  position: absolute;
-  top: 0; right: 0;
-  background: var(--yellow);
-  color: var(--ink);
-  font-family: 'Playfair Display', serif;
-  font-weight: 900;
-  font-size: var(--expo-size);
-  letter-spacing: 0.18em;
-  padding: 2mm 4mm 2mm 5mm;
-  /* Parallelograme angle vers la droite : le coin bas-gauche ne descend
-     plus jusqu'au bord gauche, ce qui evite de masquer le nom du produit. */
-  clip-path: polygon(15% 0, 100% 0, 100% 100%, 30% 100%);
-  display: none; /* Affiche via JS quand expo coche */
-  z-index: 2;
-}
-.label--expo .label__expo { display: block; }
-
-/* Quand EXPO est actif, on reserve a droite l'espace occupe par le tag
-   pour que le nom et la marque ne se retrouvent pas dessous. Le badge fait
-   approximativement (expo-size * 2.94 em pour le texte + 9mm de padding),
-   et le clip-path s'arrete a 30% : on dimensionne la marge en consequence. */
-.label--expo .label__brand,
-.label--expo .label__name {
-  padding-right: calc(var(--expo-size) * 2.6 + 5mm);
-}
-
-/* Brand mini (logo + nom en haut) */
-.label__brand {
+/* ---- TOP BAR (navy) -------------------------------------- */
+.poster__top {
+  background: var(--navy);
+  color: var(--white);
+  padding: 0 14mm;
   display: flex;
   align-items: center;
-  gap: 2mm;
-  margin-bottom: 2mm;
+  justify-content: space-between;
+  gap: 6mm;
+  position: relative;
 }
-.label__brand-logo {
-  width: var(--logo-size);
-  height: var(--logo-size);
+.poster__brand { display: flex; align-items: center; gap: 4mm; }
+.poster__brand-logo {
+  flex: 0 0 auto;
+  width: 26mm; height: 26mm;
   border-radius: 50%;
   object-fit: cover;
-  flex: 0 0 auto;
+  /* Pas de fond ni de padding : le PNG est deja un cercle complet */
+  box-shadow: 0 0.5mm 2mm rgba(0,0,0,0.18);
 }
-.label__brand-text {
-  display: flex;
-  flex-direction: column;
+.poster__brand-text { display: flex; flex-direction: column; line-height: 1; }
+.poster__brand-name {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-size: 11mm;
+  letter-spacing: 0.5px;
   line-height: 1;
 }
-.label__brand-name {
-  font-family: 'Playfair Display', serif;
-  font-size: var(--brand-name-size);
-  font-weight: 900;
-  color: var(--navy);
-  letter-spacing: 0.3px;
+.poster__brand-city {
+  font-size: 3mm;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  margin-top: 1.5mm;
+  color: var(--yellow);
+  font-weight: 700;
 }
-.label__brand-city {
-  font-size: var(--brand-city-size);
+.poster__expo {
+  display: none;
+  align-items: center;
+  gap: 2mm;
+  background: var(--white);
+  color: var(--navy);
+  padding: 2.5mm 5mm;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 3.6mm;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 0.5mm;
 }
+.poster__expo svg { width: 5mm; height: 5mm; }
+.poster[data-expo="true"] .poster__expo { display: inline-flex; }
 
-/* Nom du produit */
-.label__name {
-  font-family: 'Playfair Display', serif;
-  font-size: var(--name-size);
-  font-weight: 700;
-  line-height: 1.15;
-  color: var(--ink);
-  margin: 1mm 0 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* ---- MAIN (split 60/40) ---------------------------------- */
+.poster__main {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  position: relative;
 }
-
-/* Reference SKU */
-.label__ref {
-  font-size: var(--ref-size);
-  color: var(--muted);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-top: 1mm;
-  min-height: 9pt;
-}
-.label__ref:empty { display: none; }
-
-/* Bloc prix : aligne en bas */
-.label__prices {
-  margin-top: auto;
+.poster__content {
+  padding: 14mm 12mm 14mm 14mm;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1mm;
+  justify-content: center;
+  gap: 5mm;
+  background: var(--cream);
+  position: relative;
+  z-index: 1;
 }
-.label__old {
-  font-family: 'DM Sans', sans-serif;
-  font-size: var(--old-size);
-  font-weight: 500;
-  color: var(--muted);
-  text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
-  text-decoration-color: var(--danger);
-  display: none;
-}
-.label__old:not(:empty) { display: block; }
-.label__price {
+.poster__eyebrow {
   display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 4mm;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--navy);
+  padding: 1.6mm 4mm 1.6mm 4mm;
+  border-left: 1.5mm solid var(--yellow);
+  background: var(--white);
+}
+.poster__name {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-size: 22mm;
+  line-height: 0.95;
+  margin: 0;
+  color: var(--ink);
+  word-break: break-word;
+  hyphens: auto;
+}
+.poster__ref {
+  font-size: 4mm;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.poster__pitch {
+  font-family: var(--font-sans);
+  font-size: 4.5mm;
+  line-height: 1.4;
+  color: var(--ink);
+  max-width: 95%;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Coin jaune diagonal qui mord le contenu (decoratif) */
+.poster__corner {
+  position: absolute;
+  top: 0;
+  left: 60%;
+  width: 28mm;
+  height: 100%;
+  background: var(--yellow);
+  transform: translateX(-50%) skewX(-12deg);
+  z-index: 0;
+}
+
+/* ---- PRICE BLOCK (yellow hero) --------------------------- */
+.poster__price-block {
+  background: var(--yellow);
+  color: var(--navy);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10mm 8mm;
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+.poster__old {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 10mm;
+  line-height: 1;
+  color: var(--navy);
+  opacity: 0.55;
+  text-decoration: line-through;
+  text-decoration-thickness: 1mm;
+  text-decoration-color: var(--danger);
+  margin-bottom: 3mm;
+  display: flex;
   align-items: baseline;
   gap: 1mm;
-  background: var(--label-accent);
-  color: var(--label-accent-fg);
-  padding: 2mm 4mm;
-  border-radius: 3mm;
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
 }
-.label__price-value {
-  font-family: 'Playfair Display', serif;
-  font-size: var(--price-value-size);
-  font-weight: 900;
-  line-height: 1;
-}
-.label__price-currency {
-  font-size: var(--price-currency-size);
-  font-weight: 700;
-  opacity: 0.85;
-}
+.poster__old-currency { font-size: 6mm; }
+.poster:not([data-promo="true"]) .poster__old { display: none; }
 
-/* Footer (mention "Vente en l'etat" pour expo, sinon cache) */
-.label__footer {
-  display: none;
-  margin-top: 2mm;
-  font-size: var(--footer-size);
-  color: var(--muted);
-  font-style: italic;
-}
-.label--expo .label__footer { display: block; }
-
-/* Bouton supprimer (visible uniquement dans la planche, pas a l'impression) */
-.label__remove {
-  position: absolute;
-  top: -8px; right: -8px;
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  background: var(--danger);
-  color: #fff;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(192, 57, 43, 0.4);
-  z-index: 5;
-  transition: transform 0.15s;
-}
-.label__remove:hover { transform: scale(1.1); }
-.sheet-grid .label__remove { display: inline-flex; }
-.preview-wrap .label__remove { display: none; }
-
-/* ============================================================
-   PLANCHE A4 — vignette ecran
-   Mise a echelle pour rentrer dans la colonne droite
-   ============================================================ */
-.sheet-thumb {
-  --thumb-scale: 0.42; /* portrait par defaut */
-  --paper-bg: #ffffff;
-  position: relative;
-  background: var(--paper-bg);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  /* Suit l'orientation : portrait 210x297, paysage 297x210 */
-  width: var(--paper-w);
-  height: var(--paper-h);
-  transform: scale(var(--thumb-scale));
-  transform-origin: top left;
-  margin-bottom: calc(var(--paper-h) * (var(--thumb-scale) - 1));
-  margin-right:  calc(var(--paper-w) * (var(--thumb-scale) - 1));
-  box-shadow: var(--shadow);
-  padding: var(--sheet-pad-y) var(--sheet-pad-x);
-  transition: width 0.2s, height 0.2s, margin 0.2s, transform 0.2s;
-}
-.sheet-thumb.orientation--landscape { --thumb-scale: 0.30; }
-.sheet-grid {
-  display: grid;
-  grid-template-columns: repeat(var(--label-cols), var(--label-w));
-  grid-template-rows: repeat(var(--label-rows), var(--label-h));
-  gap: var(--sheet-gap-y) var(--sheet-gap-x);
-  justify-content: center;
-  align-content: start;
-}
-.sheet-grid .label {
-  border-style: dashed;
-  border-color: #c8c8c8;
-}
-/* Format 5 en PORTRAIT (2x3) : la 5e etiquette est centree en bas
-   En paysage (3x2), la 5e tombe naturellement en bas-milieu, aucune regle. */
-.orientation--portrait.sheet--count-5 .sheet-grid > .label:nth-child(5) {
-  grid-column: 1 / span 2;
-  justify-self: center;
-}
-.sheet-empty {
-  position: absolute;
-  inset: 0;
+.poster__price {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: 2mm;
+  font-family: var(--font-serif);
+  font-weight: 900;
+  line-height: 0.9;
+  color: var(--navy);
+}
+.poster__price-value {
+  font-size: 52mm;
+  letter-spacing: -0.03em;
+}
+.poster__price-currency {
+  font-size: 26mm;
+  font-weight: 900;
+}
+.poster__price-label {
+  margin-top: 4mm;
+  font-family: var(--font-sans);
+  font-size: 3.5mm;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--navy);
+  opacity: 0.75;
+}
+
+/* Ruban PROMO en diagonale (coin haut-droite) */
+.poster__promo-ribbon {
+  display: none;
+  position: absolute;
+  top: 8mm;
+  right: -16mm;
+  background: var(--danger);
+  color: var(--white);
+  padding: 2.5mm 18mm;
+  transform: rotate(35deg);
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-size: 6mm;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  box-shadow: 0 1mm 3mm rgba(0,0,0,0.18);
+  z-index: 3;
+  white-space: nowrap;
+}
+.poster[data-promo="true"] .poster__promo-ribbon { display: inline-block; }
+
+/* Pastille -XX% en bas a droite du bloc prix */
+.poster__discount {
+  display: none;
+  position: absolute;
+  bottom: 6mm;
+  right: 6mm;
+  background: var(--navy);
+  color: var(--yellow);
+  border: 1mm solid var(--white);
+  width: 26mm; height: 26mm;
+  border-radius: 50%;
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-size: 9mm;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  color: var(--muted);
-  text-align: center;
-  pointer-events: none;
+  transform: rotate(-8deg);
+  box-shadow: 0 1mm 4mm rgba(0,0,0,0.18);
+  z-index: 2;
 }
-.sheet-empty[hidden] { display: none; }
-.sheet-empty p { margin: 0; }
+.poster[data-promo="true"] .poster__discount:not(:empty) { display: flex; }
+
+/* ---- BOTTOM BAR (navy) ---------------------------------- */
+.poster__bottom {
+  background: var(--navy);
+  color: var(--white);
+  padding: 0 14mm;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6mm;
+  font-size: 3.6mm;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.poster__bottom strong {
+  color: var(--yellow);
+  font-weight: 800;
+}
+.poster__sep {
+  margin: 0 1.5mm;
+  color: var(--yellow);
+  opacity: 0.8;
+}
+.poster__bottom-left, .poster__bottom-right {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
 
 /* ============================================================
-   ZONE D'IMPRESSION (cachee a l'ecran)
+   RESPONSIVE — adapte le chrome (header, formulaire) sur les
+   ecrans etroits. Le poster lui-meme reste fixe en mm et est
+   scale par JS — il a donc deja l'air bien sur tous les ecrans.
    ============================================================ */
-.print-area {
-  display: none;
+@media (max-width: 1100px) {
+  .app-grid { grid-template-columns: 1fr; }
 }
-
-/* ============================================================
-   RESPONSIVE — tablettes, telephones, tres petits ecrans
-   Le layout 3-cols est deja gere plus haut (1100px -> 2 cols,
-   720px -> 1 col). Ici on ajuste paddings, tailles, et echelles
-   du preview et de la planche pour que tout tienne sur un phone.
-   ============================================================ */
-
-/* Garde-fou anti-overflow horizontal partout (svg longs, labels) */
-html, body { overflow-x: hidden; }
-.panel, .field, .form, .preview-wrap, .sheet-thumb { min-width: 0; }
-
-/* --- Tablettes (≤ 900px) : on resserre tout --- */
 @media (max-width: 900px) {
-  .app-header {
-    padding: 0.85rem 1rem;
-    gap: 0.75rem;
-  }
-  .brand__logo { width: 44px; height: 44px; }
+  .app-header { padding: 0.85rem 1rem; gap: 0.75rem; }
+  .brand__logo { width: 56px; height: 56px; }
   .brand__name { font-size: 1.3rem; }
   .brand__city { font-size: 0.62rem; letter-spacing: 0.2em; }
   .app-header__hint { font-size: 0.7rem; padding: 0.4rem 0.7rem; }
-
   .app-grid { padding: 1rem; gap: 1rem; }
   .panel { padding: 1rem 1rem 1.2rem; }
-  .panel__title { font-size: 1.08rem; }
+  .panel__title { font-size: 1.05rem; }
 }
-
-/* --- Telephones (≤ 640px) : header empile, boutons plein-largeur, preview & planche reduits --- */
 @media (max-width: 640px) {
-  /* Header : stack vertical, hint sur sa propre ligne */
   .app-header {
     flex-direction: column;
     align-items: stretch;
@@ -899,677 +718,73 @@ html, body { overflow-x: hidden; }
     padding: 0.75rem 0.9rem;
   }
   .app-header__actions { width: 100%; }
-  .app-header__hint {
-    width: 100%;
-    box-sizing: border-box;
-    text-align: left;
-  }
-
-  /* Layout : marges fines */
+  .app-header__hint { width: 100%; box-sizing: border-box; text-align: left; }
   .app-grid { padding: 0.75rem; gap: 0.75rem; }
   .panel { padding: 0.9rem 0.85rem 1rem; }
   .panel__title { font-size: 1rem; margin-bottom: 0.85rem; }
-
-  /* Champs prix cote-a-cote -> empiles */
   .field-row { grid-template-columns: 1fr; gap: 0.5rem; }
-
-  /* Selecteur de format : 3 cartes plus compactes */
-  .format-grid { gap: 0.4rem; }
-  .format-card { padding: 0.55rem 0.35rem 0.4rem; gap: 0.35rem; }
-  .format-card__num { font-size: 1.05rem; }
-  .format-card__layout { width: 26px; height: 36px; }
-  .format-card__text { font-size: 0.58rem; letter-spacing: 0.14em; }
-
-  /* Selecteur d'orientation : padding reduit */
-  .orient-card { padding: 0.55rem 0.4rem; gap: 0.3rem; }
-  .orient-card__label { font-size: 0.85rem; }
-  .orient-card__hint { font-size: 0.62rem; letter-spacing: 0.06em; }
-
-  /* Form actions : boutons plein-largeur en colonne */
+  .mode-grid { grid-template-columns: 1fr; }
   .form__actions { flex-direction: column; gap: 0.5rem; }
   .form__actions .btn { width: 100%; justify-content: center; }
-
-  /* Panel sheet : header empile + boutons en ligne plein-largeur */
-  .panel__header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.6rem;
-  }
-  .panel__tools { display: flex; }
-  .panel__tools .btn { flex: 1; justify-content: center; }
-
-  /* Apercu : echelles reduites pour tenir sur viewport ~360-400px */
-  .preview-wrap.orientation--portrait.sheet--count-1  { --preview-scale: 0.32; }
-  .preview-wrap.orientation--portrait.sheet--count-2,
-  .preview-wrap.orientation--portrait.sheet--count-3  { --preview-scale: 0.36; }
-  .preview-wrap.orientation--portrait.sheet--count-4  { --preview-scale: 0.65; }
-  .preview-wrap.orientation--portrait.sheet--count-5,
-  .preview-wrap.orientation--portrait.sheet--count-6  { --preview-scale: 0.72; }
-  .preview-wrap.orientation--landscape.sheet--count-1 { --preview-scale: 0.24; }
-  .preview-wrap.orientation--landscape.sheet--count-2,
-  .preview-wrap.orientation--landscape.sheet--count-3 { --preview-scale: 0.45; }
-  .preview-wrap.orientation--landscape.sheet--count-4 { --preview-scale: 0.50; }
-  .preview-wrap.orientation--landscape.sheet--count-5,
-  .preview-wrap.orientation--landscape.sheet--count-6 { --preview-scale: 0.72; }
-
-  /* Vignette planche A4 : echelle reduite pour tenir dans la colonne */
-  .sheet-thumb { --thumb-scale: 0.32; }
-  .sheet-thumb.orientation--landscape { --thumb-scale: 0.22; }
 }
-
-/* --- Tres petits ecrans (≤ 380px) : derniere passe --- */
 @media (max-width: 380px) {
   .app-header { padding: 0.65rem 0.75rem; }
-  .brand__logo { width: 36px; height: 36px; }
+  .brand__logo { width: 44px; height: 44px; }
   .brand__name { font-size: 1.15rem; }
-
   .app-grid { padding: 0.6rem; gap: 0.6rem; }
   .panel { padding: 0.75rem 0.7rem 0.85rem; }
-
-  .format-card__num { font-size: 0.95rem; }
-  .format-card__layout { width: 22px; height: 30px; }
-
-  .chip-grid { grid-template-columns: repeat(2, 1fr); }
-  .icon-grid  { grid-template-columns: repeat(4, 1fr); }
-
-  .sheet-thumb { --thumb-scale: 0.27; }
-  .sheet-thumb.orientation--landscape { --thumb-scale: 0.19; }
 }
 
 /* ============================================================
-   @media print : la magie de l'impression A4
+   IMPRESSION — A4 paysage, marges nulles, on imprime
+   uniquement #livePoster a sa taille reelle (297x210mm)
    ============================================================ */
 @media print {
-  /* @page est aussi pilote par <style id="pageStyle"> en JS,
-     mais on garde un fallback portrait par defaut. */
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
+  @page { size: A4 landscape; margin: 0; }
+
   html, body {
-    background: #fff !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: var(--paper-w) !important;
-    height: var(--paper-h) !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
+    width: 297mm;
+    height: 210mm;
+    margin: 0;
+    padding: 0;
+    background: var(--white);
+    overflow: hidden;
   }
-  .no-print, .app-header, .panel__tools, .label__remove { display: none !important; }
+
+  /* On masque tout le chrome (header, panels, formulaire)
+     puis on revele uniquement le poster. */
   body * { visibility: hidden; }
-  .print-area, .print-area * { visibility: visible; }
+  .preview-wrap, .preview-wrap * { visibility: visible; }
 
-  /* Neutralise les transforms/margins ecran qui pourraient
-     deborder dans le rendu d'impression. */
-  .sheet-thumb,
-  .preview-wrap,
-  .preview-wrap #livePreview {
-    transform: none !important;
-    margin: 0 !important;
-  }
-
-  .print-area {
-    display: block !important;
+  /* Le wrap perd son ratio/scale et redevient plein A4 */
+  .preview-wrap {
     position: absolute;
     top: 0; left: 0;
-    width: var(--paper-w);
-    height: var(--paper-h);
-    padding: var(--sheet-pad-y) var(--sheet-pad-x);
-    background: var(--paper-bg, #ffffff);
-    overflow: hidden;
-    transform: none !important;
-    margin: 0 !important;
-  }
-  .print-grid {
-    display: grid;
-    grid-template-columns: repeat(var(--label-cols), var(--label-w));
-    grid-template-rows: repeat(var(--label-rows), var(--label-h));
-    gap: var(--sheet-gap-y) var(--sheet-gap-x);
-    justify-content: center;
-    align-content: start;
-  }
-  .print-grid .label {
-    border-style: dashed;
-    border-color: #999;
+    width: 297mm;
+    height: 210mm;
+    aspect-ratio: auto;
+    background: var(--white);
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
     box-shadow: none;
-    page-break-inside: avoid;
-    break-inside: avoid;
+    padding: 0;
+    margin: 0;
   }
-  .print-grid .label__price {
-    box-shadow: none !important;
+  .preview-wrap .poster {
+    position: absolute;
+    top: 0; left: 0;
+    transform: none !important;
+    margin: 0;
+    box-shadow: none;
   }
-  .orientation--portrait.sheet--count-5 .print-grid > .label:nth-child(5) {
-    grid-column: 1 / span 2;
-    justify-self: center;
+
+  /* Couleurs fideles a l'ecran (impression couleur) */
+  .poster, .poster__top, .poster__bottom,
+  .poster__price-block, .poster__corner,
+  .poster__promo-ribbon, .poster__discount, .poster__expo {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
-/* ============================================================
-   ORIENTATIONS — swap paper-w / paper-h
-   ============================================================ */
-.orientation--portrait  { --paper-w: 210mm; --paper-h: 297mm; }
-.orientation--landscape { --paper-w: 297mm; --paper-h: 210mm; }
-
-/* ============================================================
-   FORMATS — chaque classe override les vars (taille + polices).
-   --label-w / --label-h se recalculent automatiquement depuis
-   --paper-w / --paper-h / --label-cols / --label-rows.
-   ============================================================ */
-
-/* count-1 : 1 etiquette XL plein A4 */
-.sheet--count-1 {
-  --label-cols: 1;
-  --label-rows: 1;
-  --label-w: calc(var(--paper-w) - (var(--sheet-pad-x) * 2));
-  --label-h: calc(var(--paper-h) - (var(--sheet-pad-y) * 2));
-  --label-pad-x: 18mm;
-  --label-pad-y: 18mm;
-  --logo-size: 28mm;
-  --brand-name-size: 28pt;
-  --brand-city-size: 12pt;
-  --name-size: 42pt;
-  --ref-size: 14pt;
-  --old-size: 28pt;
-  --price-value-size: 110pt;
-  --price-currency-size: 56pt;
-  --expo-size: 32pt;
-  --footer-size: 14pt;
-}
-
-/* count-2 : 2 etiquettes L (portrait : 1 col x 2 lignes / paysage : 2 col x 1 ligne) */
-.sheet--count-2 {
-  --label-cols: 1;
-  --label-rows: 2;
-  --label-w: calc(var(--paper-w) - (var(--sheet-pad-x) * 2));
-  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - var(--sheet-gap-y)) / 2);
-  --label-pad-x: 14mm;
-  --label-pad-y: 12mm;
-  --logo-size: 20mm;
-  --brand-name-size: 20pt;
-  --brand-city-size: 10pt;
-  --name-size: 30pt;
-  --ref-size: 11pt;
-  --old-size: 20pt;
-  --price-value-size: 70pt;
-  --price-currency-size: 36pt;
-  --expo-size: 24pt;
-  --footer-size: 11pt;
-}
-.orientation--landscape.sheet--count-2 {
-  --label-cols: 2;
-  --label-rows: 1;
-  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
-  --label-h: calc(var(--paper-h) - (var(--sheet-pad-y) * 2));
-}
-
-/* count-3 : 3 etiquettes M (portrait : 1 col x 3 lignes / paysage : 3 col x 1 ligne) */
-.sheet--count-3 {
-  --label-cols: 1;
-  --label-rows: 3;
-  --label-w: calc(var(--paper-w) - (var(--sheet-pad-x) * 2));
-  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - (var(--sheet-gap-y) * 2)) / 3);
-  --label-pad-x: 12mm;
-  --label-pad-y: 8mm;
-  --logo-size: 16mm;
-  --brand-name-size: 16pt;
-  --brand-city-size: 8.5pt;
-  --name-size: 22pt;
-  --ref-size: 10pt;
-  --old-size: 16pt;
-  --price-value-size: 52pt;
-  --price-currency-size: 28pt;
-  --expo-size: 18pt;
-  --footer-size: 9pt;
-}
-.orientation--landscape.sheet--count-3 {
-  --label-cols: 3;
-  --label-rows: 1;
-  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - (var(--sheet-gap-x) * 2)) / 3);
-  --label-h: calc(var(--paper-h) - (var(--sheet-pad-y) * 2));
-}
-
-/* count-4 : 4 etiquettes M (2 col x 2 lignes — meme grille en portrait et paysage) */
-.sheet--count-4 {
-  --label-cols: 2;
-  --label-rows: 2;
-  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
-  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - var(--sheet-gap-y)) / 2);
-  --label-pad-x: 8mm;
-  --label-pad-y: 9mm;
-  --logo-size: 14mm;
-  --brand-name-size: 15pt;
-  --brand-city-size: 7.5pt;
-  --name-size: 18pt;
-  --ref-size: 9pt;
-  --old-size: 14pt;
-  --price-value-size: 38pt;
-  --price-currency-size: 22pt;
-  --expo-size: 15pt;
-  --footer-size: 8pt;
-}
-
-/* count-5 : 5 etiquettes S (portrait : 2 col x 3 lignes, 5e centree en bas
-                              paysage : 3 col x 2 lignes, la 5e tombe en bas-milieu naturellement) */
-.sheet--count-5 {
-  --label-cols: 2;
-  --label-rows: 3;
-  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
-  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - (var(--sheet-gap-y) * 2)) / 3);
-  --label-pad-x: 6mm;
-  --label-pad-y: 6mm;
-  --logo-size: 12mm;
-  --brand-name-size: 12pt;
-  --brand-city-size: 6pt;
-  --name-size: 16pt;
-  --ref-size: 8pt;
-  --old-size: 12pt;
-  --price-value-size: 28pt;
-  --price-currency-size: 18pt;
-  --expo-size: 12pt;
-  --footer-size: 7pt;
-}
-.orientation--landscape.sheet--count-5 {
-  --label-cols: 3;
-  --label-rows: 2;
-  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - (var(--sheet-gap-x) * 2)) / 3);
-  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - var(--sheet-gap-y)) / 2);
-}
-
-/* count-6 : 6 etiquettes S (portrait : 2 col x 3 lignes / paysage : 3 col x 2 lignes) */
-.sheet--count-6 {
-  --label-cols: 2;
-  --label-rows: 3;
-  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
-  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - (var(--sheet-gap-y) * 2)) / 3);
-  --label-pad-x: 6mm;
-  --label-pad-y: 6mm;
-  --logo-size: 12mm;
-  --brand-name-size: 12pt;
-  --brand-city-size: 6pt;
-  --name-size: 16pt;
-  --ref-size: 8pt;
-  --old-size: 12pt;
-  --price-value-size: 28pt;
-  --price-currency-size: 18pt;
-  --expo-size: 12pt;
-  --footer-size: 7pt;
-}
-.orientation--landscape.sheet--count-6 {
-  --label-cols: 3;
-  --label-rows: 2;
-  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - (var(--sheet-gap-x) * 2)) / 3);
-  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - var(--sheet-gap-y)) / 2);
-}
-
-/* ============================================================
-   FORM — sous-titre des sections "Style de l'etiquette"
-   ============================================================ */
-.form__subtitle {
-  font-family: 'Playfair Display', serif;
-  font-size: 0.95rem;
-  color: var(--navy);
-  margin: 0.4rem 0 0.6rem;
-  letter-spacing: 0.3px;
-}
-
-/* ============================================================
-   PALETTE DE PASTILLES COULEUR (chips)
-   Utilise pour : couleur planche, fond etiquette, accent
-   ============================================================ */
-.chip-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.5rem;
-}
-@media (max-width: 1100px) {
-  .chip-grid { grid-template-columns: repeat(3, 1fr); }
-}
-.chip-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  cursor: pointer;
-}
-.chip-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 0; height: 0;
-}
-.chip {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--chip-color, #fff);
-  border: 2px solid var(--line);
-  box-shadow: inset 0 0 0 2px #fff;
-  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-  position: relative;
-}
-.chip-option:hover .chip { transform: scale(1.08); }
-.chip-option input:checked + .chip {
-  border-color: var(--navy);
-  box-shadow: inset 0 0 0 2px #fff, 0 0 0 3px var(--navy-50);
-}
-.chip-option input:checked + .chip::after {
-  content: "";
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 10px; height: 10px;
-  margin: -5px 0 0 -5px;
-  border-radius: 50%;
-  background: var(--navy);
-  box-shadow: 0 0 0 2px #fff;
-}
-.chip-option input:focus-visible + .chip {
-  outline: 2px solid var(--navy);
-  outline-offset: 3px;
-}
-.chip-label {
-  font-size: 0.65rem;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  text-transform: capitalize;
-  text-align: center;
-  white-space: nowrap;
-}
-.chip-option input:checked ~ .chip-label {
-  color: var(--navy);
-  font-weight: 700;
-}
-
-/* Couleurs de planche */
-.chip--paper-white  { --chip-color: #ffffff; }
-.chip--paper-cream  { --chip-color: #faf6ee; }
-.chip--paper-kraft  { --chip-color: #e6d5b3; }
-.chip--paper-rose   { --chip-color: #fce4e6; }
-.chip--paper-sky    { --chip-color: #dee9f5; }
-.chip--paper-mint   { --chip-color: #ddedde; }
-
-/* Couleurs de fond etiquette */
-.chip--bg-white  { --chip-color: #ffffff; }
-.chip--bg-cream  { --chip-color: #faf6ee; }
-.chip--bg-sand   { --chip-color: #efe2c5; }
-.chip--bg-rose   { --chip-color: #fbe1e3; }
-.chip--bg-sky    { --chip-color: #d9e9f6; }
-.chip--bg-sage   { --chip-color: #dde7d8; }
-
-/* Couleurs d'accent (bloc prix) */
-.chip--accent-navy        { --chip-color: #1E3A8A; }
-.chip--accent-yellow      { --chip-color: #FACC15; }
-.chip--accent-red         { --chip-color: #c2362d; }
-.chip--accent-black       { --chip-color: #1a1a1a; }
-.chip--accent-forest      { --chip-color: #1d5b3a; }
-.chip--accent-terracotta  { --chip-color: #b85a3a; }
-
-/* Inverse le check pour les fonds tres clairs (plus visible) */
-.chip-option input:checked + .chip--bg-white::after,
-.chip-option input:checked + .chip--paper-white::after,
-.chip-option input:checked + .chip--accent-yellow::after {
-  background: var(--ink);
-}
-
-/* ============================================================
-   SELECTEUR DE BADGE (radio cards)
-   ============================================================ */
-.badge-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.45rem;
-}
-@media (min-width: 1200px) {
-  .badge-grid { grid-template-columns: repeat(3, 1fr); }
-}
-.badge-option {
-  display: block;
-  cursor: pointer;
-}
-.badge-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 0; height: 0;
-}
-.badge-card {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.6rem;
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  width: 100%;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink);
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-}
-.badge-card svg { flex: 0 0 auto; }
-.badge-option:hover .badge-card { border-color: var(--navy); }
-.badge-option input:checked + .badge-card {
-  border-color: var(--navy);
-  background: var(--navy-50);
-  color: var(--navy);
-  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.12);
-}
-.badge-option input:focus-visible + .badge-card {
-  outline: 2px solid var(--navy);
-  outline-offset: 2px;
-}
-.badge-card--none { color: var(--muted); justify-content: center; }
-.badge-card--new      { color: #b07f00; }
-.badge-card--promo    { color: #c2362d; }
-.badge-card--love     { color: #be185d; }
-.badge-card--bio      { color: #1d5b3a; }
-.badge-card--local    { color: #b85a3a; }
-.badge-card--exclu    { color: #1a1a1a; }
-.badge-option input:checked + .badge-card--new      { color: #b07f00; background: #fef6dd; border-color: #f5c93a; }
-.badge-option input:checked + .badge-card--promo    { color: #fff; background: #c2362d; border-color: #c2362d; }
-.badge-option input:checked + .badge-card--love     { color: #fff; background: #ec4899; border-color: #ec4899; }
-.badge-option input:checked + .badge-card--bio      { color: #fff; background: #1d5b3a; border-color: #1d5b3a; }
-.badge-option input:checked + .badge-card--local    { color: #fff; background: #b85a3a; border-color: #b85a3a; }
-.badge-option input:checked + .badge-card--exclu    { color: var(--yellow); background: #1a1a1a; border-color: #1a1a1a; }
-
-/* ============================================================
-   SELECTEUR DE SYMBOLE DECORATIF (icon-only cards)
-   ============================================================ */
-.icon-grid {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 0.4rem;
-}
-@media (max-width: 1100px) {
-  .icon-grid { grid-template-columns: repeat(4, 1fr); }
-}
-.icon-option {
-  display: block;
-  cursor: pointer;
-}
-.icon-option input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 0; height: 0;
-}
-.icon-card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  color: var(--navy);
-  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
-}
-.icon-card--none { color: var(--muted); }
-.icon-option:hover .icon-card {
-  border-color: var(--navy);
-  transform: scale(1.05);
-}
-.icon-option input:checked + .icon-card {
-  border-color: var(--navy);
-  background: var(--navy-50);
-  color: var(--navy);
-  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.12);
-}
-.icon-option input:checked + .icon-card--none {
-  color: var(--muted);
-  background: var(--cream);
-}
-.icon-option input:focus-visible + .icon-card {
-  outline: 2px solid var(--navy);
-  outline-offset: 2px;
-}
-
-/* ============================================================
-   THEMING DE L'ETIQUETTE (par data-bg / data-accent)
-   --label-bg : couleur de fond ; --label-accent : couleur du bloc prix ;
-   --label-accent-fg : couleur du texte du bloc prix.
-   ============================================================ */
-.label[data-bg="white"]  { --label-bg: #ffffff; }
-.label[data-bg="cream"]  { --label-bg: #faf6ee; }
-.label[data-bg="sand"]   { --label-bg: #efe2c5; }
-.label[data-bg="rose"]   { --label-bg: #fbe1e3; }
-.label[data-bg="sky"]    { --label-bg: #d9e9f6; }
-.label[data-bg="sage"]   { --label-bg: #dde7d8; }
-
-.label[data-accent="navy"]       { --label-accent: #1E3A8A; --label-accent-fg: #ffffff; }
-.label[data-accent="yellow"]     { --label-accent: #FACC15; --label-accent-fg: #1a1a1a; }
-.label[data-accent="red"]        { --label-accent: #c2362d; --label-accent-fg: #ffffff; }
-.label[data-accent="black"]      { --label-accent: #1a1a1a; --label-accent-fg: #FACC15; }
-.label[data-accent="forest"]     { --label-accent: #1d5b3a; --label-accent-fg: #ffffff; }
-.label[data-accent="terracotta"] { --label-accent: #b85a3a; --label-accent-fg: #ffffff; }
-
-/* ============================================================
-   COULEUR DE PLANCHE (data-paper sur sheet-thumb / print-area)
-   ============================================================ */
-.sheet-thumb[data-paper="white"],
-.print-area[data-paper="white"]  { --paper-bg: #ffffff; }
-.sheet-thumb[data-paper="cream"],
-.print-area[data-paper="cream"]  { --paper-bg: #faf6ee; }
-.sheet-thumb[data-paper="kraft"],
-.print-area[data-paper="kraft"]  { --paper-bg: #e6d5b3; }
-.sheet-thumb[data-paper="rose"],
-.print-area[data-paper="rose"]   { --paper-bg: #fce4e6; }
-.sheet-thumb[data-paper="sky"],
-.print-area[data-paper="sky"]    { --paper-bg: #dee9f5; }
-.sheet-thumb[data-paper="mint"],
-.print-area[data-paper="mint"]   { --paper-bg: #ddedde; }
-
-/* ============================================================
-   BADGE PERSONNALISE SUR L'ETIQUETTE (pill au-dessus du brand)
-   Hidden par defaut, visible si data-badge est defini.
-   ============================================================ */
-.label__badge {
-  display: none; /* visible si .label[data-badge="..."] */
-  align-self: flex-start;
-  align-items: center;
-  gap: 1.5mm;
-  padding: 1mm 3mm 1mm 2.5mm;
-  margin-bottom: 1.5mm;
-  background: var(--badge-bg, var(--label-accent));
-  color: var(--badge-fg, var(--label-accent-fg));
-  border-radius: 999px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: var(--badge-size, 8.5pt);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  line-height: 1;
-  width: max-content;
-  max-width: 100%;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
-}
-.label__badge svg {
-  flex: 0 0 auto;
-  width: 1em;
-  height: 1em;
-}
-.label[data-badge]:not([data-badge=""]) .label__badge { display: inline-flex; }
-
-/* Couleurs par type de badge (override --badge-bg / --badge-fg) */
-.label[data-badge="new"]    { --badge-bg: #FACC15; --badge-fg: #1a1a1a; }
-.label[data-badge="promo"]  { --badge-bg: #c2362d; --badge-fg: #ffffff; }
-.label[data-badge="love"]   { --badge-bg: #ec4899; --badge-fg: #ffffff; }
-.label[data-badge="bio"]    { --badge-bg: #1d5b3a; --badge-fg: #ffffff; }
-.label[data-badge="local"]  { --badge-bg: #b85a3a; --badge-fg: #ffffff; }
-.label[data-badge="exclu"]  { --badge-bg: #1a1a1a; --badge-fg: #FACC15; }
-
-/* Reduction de taille du badge selon le format */
-.sheet--count-1 .label__badge { font-size: 16pt; padding: 2.5mm 6mm 2.5mm 5mm; }
-.sheet--count-2 .label__badge { font-size: 12pt; padding: 1.8mm 4.5mm; }
-.sheet--count-3 .label__badge { font-size: 10pt; padding: 1.4mm 4mm; }
-.sheet--count-4 .label__badge { font-size: 9pt; padding: 1.2mm 3.5mm; }
-.sheet--count-5 .label__badge,
-.sheet--count-6 .label__badge { font-size: 7.5pt; padding: 0.8mm 2.5mm; }
-
-/* ============================================================
-   SYMBOLE DECORATIF SUR L'ETIQUETTE (corner bottom-right)
-   Place a l'oppose du bloc prix (qui est bottom-left) pour
-   eviter tout chevauchement. Couleur propre a chaque icone
-   (flamme=rouge, couronne=or, feuille=vert, etc.).
-   ============================================================ */
-.label__deco {
-  display: none; /* visible si .label[data-icon="..."] */
-  position: absolute;
-  bottom: var(--label-pad-y);
-  right: var(--label-pad-x);
-  width: var(--deco-size, 8mm);
-  height: var(--deco-size, 8mm);
-  color: var(--deco-color, var(--label-accent));
-  opacity: 0.95;
-  pointer-events: none;
-  z-index: 0;
-}
-.label__deco svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.18));
-}
-.label[data-icon]:not([data-icon=""]) .label__deco { display: block; }
-
-/* Quand EXPO est actif, le footer 'Vente en l'etat' prend la largeur en bas :
-   on remonte le symbole pour ne pas le croiser. */
-.label--expo .label__deco { bottom: calc(var(--label-pad-y) + 4mm); }
-
-/* Le bloc prix et le footer EXPO doivent rester au-dessus du symbole
-   meme si la zone de positionnement se chevauche par accident. */
-.label__prices,
-.label__footer {
-  position: relative;
-  z-index: 1;
-}
-
-/* Tailles du symbole par format (corner, plus petit qu'un filigrane) */
-.sheet--count-1 { --deco-size: 22mm; }
-.sheet--count-2 { --deco-size: 16mm; }
-.sheet--count-3 { --deco-size: 13mm; }
-.sheet--count-4 { --deco-size: 10mm; }
-.sheet--count-5 { --deco-size: 8mm; }
-.sheet--count-6 { --deco-size: 7mm; }
-
-/* Couleur thematique par icone (override --deco-color) */
-.label[data-icon="star"]     { --deco-color: #f59e0b; } /* or */
-.label[data-icon="heart"]    { --deco-color: #ec4899; } /* rose */
-.label[data-icon="flame"]    { --deco-color: #dc2626; } /* rouge */
-.label[data-icon="leaf"]     { --deco-color: #16a34a; } /* vert */
-.label[data-icon="sparkles"] { --deco-color: #facc15; } /* jaune */
-.label[data-icon="gift"]     { --deco-color: #be185d; } /* fuschia */
-.label[data-icon="crown"]    { --deco-color: #d4a017; } /* or fonce */
-
-/* Memes couleurs sur les vignettes du selecteur de symbole (form),
-   pour que l'utilisateur voie la couleur reelle avant de choisir. */
-.icon-grid .icon-option:nth-child(2) .icon-card { color: #f59e0b; }   /* star */
-.icon-grid .icon-option:nth-child(3) .icon-card { color: #ec4899; }   /* heart */
-.icon-grid .icon-option:nth-child(4) .icon-card { color: #dc2626; }   /* flame */
-.icon-grid .icon-option:nth-child(5) .icon-card { color: #16a34a; }   /* leaf */
-.icon-grid .icon-option:nth-child(6) .icon-card { color: #facc15; }   /* sparkles */
-.icon-grid .icon-option:nth-child(7) .icon-card { color: #be185d; }   /* gift */
-.icon-grid .icon-option:nth-child(8) .icon-card { color: #d4a017; }   /* crown */
-.icon-grid .icon-option:first-child .icon-card { color: var(--muted); } /* aucun */

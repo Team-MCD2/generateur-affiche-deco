@@ -1,33 +1,72 @@
-<!-- ====================================================== -->
-<!-- TEMPLATE D'UNE ETIQUETTE                                -->
-<!-- (clone par JS via document.getElementById('labelTemplate').content)
-<!-- ====================================================== -->
-<template id="labelTemplate">
-  <div class="label" role="figure" aria-label="Etiquette produit">
-    <div class="label__expo" data-expo>EXPO</div>
-    <div class="label__badge" data-badge-slot></div>
-    <div class="label__deco" data-icon-slot aria-hidden="true"></div>
-    <div class="label__brand">
-      <img class="label__brand-logo" src="/assets/logo.png" alt="DecoShop" />
-      <div class="label__brand-text">
-        <span class="label__brand-name">DecoShop</span>
-        <span class="label__brand-city">Toulouse</span>
+<!-- ============================================================
+     AFFICHE A4 PAYSAGE — DecoShop
+     Template clone par JS (id 'posterTemplate' -> #livePoster).
+     Modes : data-promo="true" / data-expo="true" sur .poster
+     pilotent l'affichage du ruban PROMO et du badge EXPO.
+     ============================================================ -->
+<template id="posterTemplate">
+  <article class="poster" data-promo="false" data-expo="false">
+
+    <!-- TOP BAR : marque a gauche, badge EXPO a droite (si data-expo="true") -->
+    <header class="poster__top">
+      <div class="poster__brand">
+        <img class="poster__brand-logo" src="/assets/logo.png" alt="DecoShop" />
+        <div class="poster__brand-text">
+          <span class="poster__brand-name">DecoShop</span>
+          <span class="poster__brand-city">Toulouse</span>
+        </div>
       </div>
-    </div>
-    <div class="label__name" data-name>Nom du produit</div>
-    <div class="label__ref" data-ref></div>
-    <div class="label__prices">
-      <div class="label__old" data-old></div>
-      <div class="label__price">
-        <span class="label__price-value" data-price>0</span>
-        <span class="label__price-currency">€</span>
+      <div class="poster__expo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/>
+        </svg>
+        <span>Modele d'exposition</span>
       </div>
-    </div>
-    <div class="label__footer">
-      <span>Vente en l'etat — modele d'exposition</span>
-    </div>
-    <button class="label__remove" type="button" aria-label="Retirer cette etiquette">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
+    </header>
+
+    <!-- MAIN : 60% editorial / 40% bloc prix jaune -->
+    <main class="poster__main">
+
+      <!-- Bloc de gauche : chapeau + nom + reference + accroche -->
+      <section class="poster__content">
+        <span class="poster__eyebrow" data-eyebrow>Coup de coeur</span>
+        <h1 class="poster__name" data-name>Nom du produit</h1>
+        <div class="poster__ref" data-ref></div>
+        <div class="poster__pitch" data-pitch>Decouvrez nos nouveautes en magasin a Toulouse.</div>
+      </section>
+
+      <!-- Bloc de droite : prix hero (jaune) + ruban promo si data-promo -->
+      <aside class="poster__price-block">
+        <span class="poster__promo-ribbon" aria-hidden="true">Promo</span>
+        <span class="poster__discount" data-discount aria-hidden="true"></span>
+        <div class="poster__old">
+          <span data-old>0</span>
+          <span class="poster__old-currency">€</span>
+        </div>
+        <div class="poster__price">
+          <span class="poster__price-value" data-price>0</span>
+          <span class="poster__price-currency">€</span>
+        </div>
+        <span class="poster__price-label">Prix TTC</span>
+      </aside>
+
+      <!-- Element graphique : coin jaune diagonal qui mord le contenu -->
+      <span class="poster__corner" aria-hidden="true"></span>
+    </main>
+
+    <!-- BOTTOM BAR : statut produit (gauche) + tagline / adresse (droite) -->
+    <footer class="poster__bottom">
+      <span class="poster__bottom-left">
+        <strong>Vente en l'etat</strong>
+        <span class="poster__sep">·</span>
+        <span class="poster__bottom-mode" data-mode>Modele expose</span>
+      </span>
+      <span class="poster__bottom-right">
+        DecoShop Toulouse
+        <span class="poster__sep">·</span>
+        Le mobilier qui vous ressemble
+      </span>
+    </footer>
+
+  </article>
 </template>
