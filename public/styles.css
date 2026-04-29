@@ -1,0 +1,1460 @@
+/* ============================================================
+   DecoShop — Generateur d'etiquettes
+   DA officielle reprise du theme Shopify :
+   - Navy   #1E3A8A  (couleur principale)
+   - Yellow #FACC15  (accent)
+   - Cream  #FAF7F0  (fond doux)
+   - Ink    #0F172A  (texte)
+   - Polices : Playfair Display (titres) + DM Sans (texte)
+   ============================================================ */
+
+:root {
+  --navy:        #1E3A8A;
+  --navy-700:    #17306f;
+  --navy-50:     #eef2fb;
+  --yellow:      #FACC15;
+  --yellow-600:  #e0b505;
+  --cream:       #FAF7F0;
+  --ink:         #0F172A;
+  --muted:       #64748B;
+  --line:        #E5E7EB;
+  --bg:          #ffffff;
+  --danger:      #c0392b;
+
+  --radius:      14px;
+  --radius-sm:   8px;
+  --shadow-sm:   0 1px 2px rgba(15, 23, 42, .06);
+  --shadow:      0 6px 20px rgba(15, 23, 42, .08);
+  --shadow-lg:   0 18px 48px rgba(15, 23, 42, .12);
+
+  /* ----- Planche A4 (constantes) ----- */
+  --paper-w: 210mm; /* largeur A4 portrait, swap par .orientation--landscape */
+  --paper-h: 297mm; /* hauteur A4 portrait */
+  --sheet-pad-x: 7mm;
+  --sheet-pad-y: 5mm;
+  --sheet-gap-x: 16mm;
+  --sheet-gap-y: 8mm;
+
+  /* ----- Grille par defaut : 6 etiquettes par planche (2 col x 3 lignes) ----- */
+  --label-cols: 2;
+  --label-rows: 3;
+
+  /* ----- Fallbacks par defaut (count-6 portrait). Les classes
+     .sheet--count-N redeclarent ces valeurs avec leurs propres
+     formules pour eviter les soucis de substitution lazy de var(). ----- */
+  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
+  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - (var(--sheet-gap-y) * 2)) / 3);
+
+  /* ----- Padding + tailles internes par defaut ----- */
+  --label-pad-x: 5mm;
+  --label-pad-y: 6mm;
+  --logo-size: 10mm;
+  --brand-name-size: 11pt;
+  --brand-city-size: 6.5pt;
+  --name-size: 13pt;
+  --ref-size: 7pt;
+  --old-size: 11pt;
+  --price-value-size: 24pt;
+  --price-currency-size: 14pt;
+  --expo-size: 11pt;
+  --footer-size: 6.5pt;
+}
+
+/* ===== Reset minimal ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+img, svg { max-width: 100%; display: block; }
+button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+input, select, textarea { font: inherit; color: inherit; }
+
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  font-family: 'Playfair Display', 'DM Sans', serif;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--ink);
+  margin: 0 0 0.5em;
+}
+
+/* ============================================================
+   APP HEADER
+   ============================================================ */
+.app-header {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-decoration: none;
+}
+.brand__logo {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+.brand__name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: var(--navy);
+}
+.brand__city {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.app-header__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: var(--navy-50);
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #dbe4f6;
+}
+.app-header__hint svg {
+  flex: 0 0 auto;
+  color: var(--navy);
+}
+
+/* ============================================================
+   LAYOUT 3 COLONNES
+   ============================================================ */
+.app-grid {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.1fr) minmax(420px, 1.4fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .app-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .panel--sheet { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  .app-grid { grid-template-columns: 1fr; }
+}
+
+/* Apercu + Planche restent visibles quand on scrolle dans le formulaire
+   (qui est devenu plus long avec les options de style). Activé seulement
+   en layout desktop ; en mobile/tablette on retombe en scroll normal. */
+@media (min-width: 1101px) {
+  .panel--preview,
+  .panel--sheet {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+  }
+  /* Evite que la scrollbar interne de .panel--preview ne casse l'overflow:hidden
+     du .preview-wrap (qui clippe le label scale) */
+  .panel--preview { scrollbar-gutter: stable; }
+}
+
+/* ============================================================
+   PANELS
+   ============================================================ */
+.panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.4rem 1.6rem;
+  box-shadow: var(--shadow-sm);
+}
+.panel__title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  margin: 0 0 1.1rem;
+  color: var(--navy);
+}
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+}
+.panel__header .panel__title { margin: 0; }
+.panel__tools {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+.panel__hint {
+  margin: 0.8rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.panel__hint--tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--navy-50);
+  color: var(--navy);
+  border-left: 3px solid var(--navy);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.panel__hint--tip svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+.panel__hint--tip strong { color: var(--navy); }
+
+/* ============================================================
+   FORMULAIRE
+   ============================================================ */
+.form { display: flex; flex-direction: column; gap: 1rem; }
+.field { display: flex; flex-direction: column; gap: 0.35rem; }
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.field .required { color: var(--navy); font-weight: 700; }
+.field .optional { color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+.field input[type="text"],
+.field input[type="number"] {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input:focus {
+  outline: 0;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px var(--navy-50);
+}
+.field .hint {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+/* Cache les fleches du input number */
+.field input[type="number"]::-webkit-outer-spin-button,
+.field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+.field input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Checkbox EXPO custom */
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.checkbox:hover { border-color: var(--navy); background: var(--navy-50); }
+.checkbox input { position: absolute; opacity: 0; pointer-events: none; }
+.checkbox__box {
+  flex: 0 0 auto;
+  width: 22px; height: 22px;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.checkbox input:checked + .checkbox__box {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--ink);
+}
+.checkbox__label { display: flex; flex-direction: column; gap: 0.15rem; }
+.checkbox__label strong { font-weight: 700; font-size: 0.92rem; }
+.checkbox__label small { color: var(--muted); font-size: 0.78rem; line-height: 1.4; }
+.checkbox input:focus-visible + .checkbox__box {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+.form__error {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  color: var(--danger);
+  font-weight: 500;
+}
+.form__sep {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0.4rem 0;
+}
+.field__group-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== Selecteur de format de planche ===== */
+.format-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+.format-option {
+  display: block;
+  cursor: pointer;
+}
+.format-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0; height: 0;
+}
+.format-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.4rem 0.65rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.15s;
+  position: relative;
+}
+.format-option:hover .format-card {
+  border-color: var(--navy);
+  background: var(--navy-50);
+}
+.format-option input:checked + .format-card {
+  border-color: var(--navy);
+  background: var(--navy-50);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+.format-option input:checked + .format-card::after {
+  content: "";
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--navy)
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>")
+    center / 10px no-repeat;
+}
+.format-option input:focus-visible + .format-card {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+.format-card__num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--navy);
+  line-height: 1;
+}
+.format-card__layout {
+  width: 32px;
+  height: 44px; /* ratio A4 portrait */
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  padding: 2px;
+  background: #fff;
+  display: grid;
+  gap: 1.5px;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+.format-card__layout--cols-1 { grid-template-columns: 1fr; }
+.format-card__layout--cols-2 { grid-template-columns: 1fr 1fr; }
+.format-card__layout--rows-2 { grid-template-rows: 1fr 1fr; }
+.format-card__layout--rows-3 { grid-template-rows: 1fr 1fr 1fr; }
+.format-cell {
+  background: var(--yellow);
+  border-radius: 1px;
+}
+.format-card__layout--five .format-cell--centered {
+  grid-column: 1 / span 2;
+  justify-self: center;
+  width: 50%;
+}
+.format-card__text {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+.format-option input:checked + .format-card .format-card__text { color: var(--navy); }
+.format-option input:checked + .format-card .format-cell { background: var(--navy); }
+
+/* ===== Selecteur d'orientation Portrait / Paysage ===== */
+.orient-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.orient-option {
+  display: block;
+  cursor: pointer;
+}
+.orient-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0; height: 0;
+}
+.orient-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.7rem 0.5rem 0.75rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.orient-option:hover .orient-card {
+  border-color: var(--navy);
+  background: var(--navy-50);
+}
+.orient-option input:checked + .orient-card {
+  border-color: var(--navy);
+  background: var(--navy-50);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+.orient-option input:checked + .orient-card::after {
+  content: "";
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--navy)
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>")
+    center / 10px no-repeat;
+}
+.orient-option input:focus-visible + .orient-card {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+.orient-card__icon {
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  transition: color 0.15s;
+}
+.orient-option input:checked + .orient-card .orient-card__icon { color: var(--navy); }
+.orient-card__label {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.orient-card__hint {
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   BOUTONS
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.2px;
+  transition: transform 0.15s, background 0.2s, color 0.2s, box-shadow 0.2s;
+  border: 1.5px solid transparent;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+.btn--primary {
+  background: var(--navy);
+  color: #fff;
+}
+.btn--primary:hover:not(:disabled) {
+  background: var(--navy-700);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.btn--yellow {
+  background: var(--yellow);
+  color: var(--ink);
+}
+.btn--yellow:hover:not(:disabled) {
+  background: var(--yellow-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn--ghost:hover:not(:disabled) {
+  background: var(--cream);
+  border-color: var(--ink);
+}
+.btn--sm { padding: 0.5rem 0.95rem; font-size: 0.82rem; }
+
+/* ============================================================
+   APERCU LIVE
+   Le .label garde sa taille reelle (mm), on le SCALE via
+   --preview-scale (defini par format x orientation) et on
+   compense la place reservee par marges negatives pour que
+   le flex container voie la taille visible.
+   ============================================================ */
+.preview-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  border: 1px dashed #d4d8e1;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  min-height: 380px;
+  overflow: hidden; /* securite anti-debordement pour les XL */
+  --preview-scale: 1;
+}
+.preview-wrap #livePreview {
+  transform: scale(var(--preview-scale));
+  transform-origin: top left;
+  margin-right:  calc(var(--label-w) * (var(--preview-scale) - 1));
+  margin-bottom: calc(var(--label-h) * (var(--preview-scale) - 1));
+  transition: transform 0.2s, margin 0.2s;
+}
+
+/* Echelles par format x orientation
+   (la cible est ~85mm de large max, ~120mm de haut max
+    pour rester confortable dans la colonne 'Apercu') */
+.preview-wrap.orientation--portrait.sheet--count-1 { --preview-scale: 0.40; }
+.preview-wrap.orientation--portrait.sheet--count-2 { --preview-scale: 0.43; }
+.preview-wrap.orientation--portrait.sheet--count-3 { --preview-scale: 0.43; }
+.preview-wrap.orientation--portrait.sheet--count-4 { --preview-scale: 0.85; }
+.preview-wrap.orientation--portrait.sheet--count-5,
+.preview-wrap.orientation--portrait.sheet--count-6 { --preview-scale: 0.95; }
+
+.preview-wrap.orientation--landscape.sheet--count-1 { --preview-scale: 0.30; }
+.preview-wrap.orientation--landscape.sheet--count-2 { --preview-scale: 0.55; }
+.preview-wrap.orientation--landscape.sheet--count-3 { --preview-scale: 0.55; }
+.preview-wrap.orientation--landscape.sheet--count-4 { --preview-scale: 0.65; }
+.preview-wrap.orientation--landscape.sheet--count-5,
+.preview-wrap.orientation--landscape.sheet--count-6 { --preview-scale: 0.95; }
+
+/* ============================================================
+   ETIQUETTE (l'element coeur de l'app)
+   Taille reelle : 90mm x 90mm a l'impression
+   A l'ecran, on utilise transform pour ajuster
+   ============================================================ */
+.label {
+  /* Theming par defaut, override via [data-bg] / [data-accent] */
+  --label-bg: #ffffff;
+  --label-accent: var(--navy);
+  --label-accent-fg: #ffffff;
+
+  position: relative;
+  width: var(--label-w);
+  height: var(--label-h);
+  background: var(--label-bg);
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  padding: var(--label-pad-y) var(--label-pad-x);
+  display: flex;
+  flex-direction: column;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  overflow: hidden;
+  /* Force l'impression des couleurs et fonds */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Badge EXPO (top-right, en jaune) */
+.label__expo {
+  position: absolute;
+  top: 0; right: 0;
+  background: var(--yellow);
+  color: var(--ink);
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: var(--expo-size);
+  letter-spacing: 0.18em;
+  padding: 2mm 4mm 2mm 5mm;
+  /* Parallelograme angle vers la droite : le coin bas-gauche ne descend
+     plus jusqu'au bord gauche, ce qui evite de masquer le nom du produit. */
+  clip-path: polygon(15% 0, 100% 0, 100% 100%, 30% 100%);
+  display: none; /* Affiche via JS quand expo coche */
+  z-index: 2;
+}
+.label--expo .label__expo { display: block; }
+
+/* Quand EXPO est actif, on reserve a droite l'espace occupe par le tag
+   pour que le nom et la marque ne se retrouvent pas dessous. La taille
+   est proportionnelle a --expo-size (qui scale deja par format). */
+.label--expo .label__brand,
+.label--expo .label__name {
+  padding-right: calc(var(--expo-size) * 1.6);
+}
+
+/* Brand mini (logo + nom en haut) */
+.label__brand {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  margin-bottom: 2mm;
+}
+.label__brand-logo {
+  width: var(--logo-size);
+  height: var(--logo-size);
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+.label__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.label__brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: var(--brand-name-size);
+  font-weight: 900;
+  color: var(--navy);
+  letter-spacing: 0.3px;
+}
+.label__brand-city {
+  font-size: var(--brand-city-size);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.5mm;
+}
+
+/* Nom du produit */
+.label__name {
+  font-family: 'Playfair Display', serif;
+  font-size: var(--name-size);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+  margin: 1mm 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Reference SKU */
+.label__ref {
+  font-size: var(--ref-size);
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 1mm;
+  min-height: 9pt;
+}
+.label__ref:empty { display: none; }
+
+/* Bloc prix : aligne en bas */
+.label__prices {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1mm;
+}
+.label__old {
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--old-size);
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: var(--danger);
+  display: none;
+}
+.label__old:not(:empty) { display: block; }
+.label__price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1mm;
+  background: var(--label-accent);
+  color: var(--label-accent-fg);
+  padding: 2mm 4mm;
+  border-radius: 3mm;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+}
+.label__price-value {
+  font-family: 'Playfair Display', serif;
+  font-size: var(--price-value-size);
+  font-weight: 900;
+  line-height: 1;
+}
+.label__price-currency {
+  font-size: var(--price-currency-size);
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+/* Footer (mention "Vente en l'etat" pour expo, sinon cache) */
+.label__footer {
+  display: none;
+  margin-top: 2mm;
+  font-size: var(--footer-size);
+  color: var(--muted);
+  font-style: italic;
+}
+.label--expo .label__footer { display: block; }
+
+/* Bouton supprimer (visible uniquement dans la planche, pas a l'impression) */
+.label__remove {
+  position: absolute;
+  top: -8px; right: -8px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #fff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(192, 57, 43, 0.4);
+  z-index: 5;
+  transition: transform 0.15s;
+}
+.label__remove:hover { transform: scale(1.1); }
+.sheet-grid .label__remove { display: inline-flex; }
+.preview-wrap .label__remove { display: none; }
+
+/* ============================================================
+   PLANCHE A4 — vignette ecran
+   Mise a echelle pour rentrer dans la colonne droite
+   ============================================================ */
+.sheet-thumb {
+  --thumb-scale: 0.42; /* portrait par defaut */
+  --paper-bg: #ffffff;
+  position: relative;
+  background: var(--paper-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  /* Suit l'orientation : portrait 210x297, paysage 297x210 */
+  width: var(--paper-w);
+  height: var(--paper-h);
+  transform: scale(var(--thumb-scale));
+  transform-origin: top left;
+  margin-bottom: calc(var(--paper-h) * (var(--thumb-scale) - 1));
+  margin-right:  calc(var(--paper-w) * (var(--thumb-scale) - 1));
+  box-shadow: var(--shadow);
+  padding: var(--sheet-pad-y) var(--sheet-pad-x);
+  transition: width 0.2s, height 0.2s, margin 0.2s, transform 0.2s;
+}
+.sheet-thumb.orientation--landscape { --thumb-scale: 0.30; }
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--label-cols), var(--label-w));
+  grid-template-rows: repeat(var(--label-rows), var(--label-h));
+  gap: var(--sheet-gap-y) var(--sheet-gap-x);
+  justify-content: center;
+  align-content: start;
+}
+.sheet-grid .label {
+  border-style: dashed;
+  border-color: #c8c8c8;
+}
+/* Format 5 en PORTRAIT (2x3) : la 5e etiquette est centree en bas
+   En paysage (3x2), la 5e tombe naturellement en bas-milieu, aucune regle. */
+.orientation--portrait.sheet--count-5 .sheet-grid > .label:nth-child(5) {
+  grid-column: 1 / span 2;
+  justify-self: center;
+}
+.sheet-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--muted);
+  text-align: center;
+  pointer-events: none;
+}
+.sheet-empty[hidden] { display: none; }
+.sheet-empty p { margin: 0; }
+
+/* ============================================================
+   ZONE D'IMPRESSION (cachee a l'ecran)
+   ============================================================ */
+.print-area {
+  display: none;
+}
+
+/* ============================================================
+   @media print : la magie de l'impression A4
+   ============================================================ */
+@media print {
+  /* @page est aussi pilote par <style id="pageStyle"> en JS,
+     mais on garde un fallback portrait par defaut. */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: var(--paper-w) !important;
+    height: var(--paper-h) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .no-print, .app-header, .panel__tools, .label__remove { display: none !important; }
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+
+  /* Neutralise les transforms/margins ecran qui pourraient
+     deborder dans le rendu d'impression. */
+  .sheet-thumb,
+  .preview-wrap,
+  .preview-wrap #livePreview {
+    transform: none !important;
+    margin: 0 !important;
+  }
+
+  .print-area {
+    display: block !important;
+    position: absolute;
+    top: 0; left: 0;
+    width: var(--paper-w);
+    height: var(--paper-h);
+    padding: var(--sheet-pad-y) var(--sheet-pad-x);
+    background: var(--paper-bg, #ffffff);
+    overflow: hidden;
+    transform: none !important;
+    margin: 0 !important;
+  }
+  .print-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--label-cols), var(--label-w));
+    grid-template-rows: repeat(var(--label-rows), var(--label-h));
+    gap: var(--sheet-gap-y) var(--sheet-gap-x);
+    justify-content: center;
+    align-content: start;
+  }
+  .print-grid .label {
+    border-style: dashed;
+    border-color: #999;
+    box-shadow: none;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .print-grid .label__price {
+    box-shadow: none !important;
+  }
+  .orientation--portrait.sheet--count-5 .print-grid > .label:nth-child(5) {
+    grid-column: 1 / span 2;
+    justify-self: center;
+  }
+}
+
+/* ============================================================
+   ORIENTATIONS — swap paper-w / paper-h
+   ============================================================ */
+.orientation--portrait  { --paper-w: 210mm; --paper-h: 297mm; }
+.orientation--landscape { --paper-w: 297mm; --paper-h: 210mm; }
+
+/* ============================================================
+   FORMATS — chaque classe override les vars (taille + polices).
+   --label-w / --label-h se recalculent automatiquement depuis
+   --paper-w / --paper-h / --label-cols / --label-rows.
+   ============================================================ */
+
+/* count-1 : 1 etiquette XL plein A4 */
+.sheet--count-1 {
+  --label-cols: 1;
+  --label-rows: 1;
+  --label-w: calc(var(--paper-w) - (var(--sheet-pad-x) * 2));
+  --label-h: calc(var(--paper-h) - (var(--sheet-pad-y) * 2));
+  --label-pad-x: 18mm;
+  --label-pad-y: 18mm;
+  --logo-size: 28mm;
+  --brand-name-size: 28pt;
+  --brand-city-size: 12pt;
+  --name-size: 42pt;
+  --ref-size: 14pt;
+  --old-size: 28pt;
+  --price-value-size: 110pt;
+  --price-currency-size: 56pt;
+  --expo-size: 32pt;
+  --footer-size: 14pt;
+}
+
+/* count-2 : 2 etiquettes L (portrait : 1 col x 2 lignes / paysage : 2 col x 1 ligne) */
+.sheet--count-2 {
+  --label-cols: 1;
+  --label-rows: 2;
+  --label-w: calc(var(--paper-w) - (var(--sheet-pad-x) * 2));
+  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - var(--sheet-gap-y)) / 2);
+  --label-pad-x: 14mm;
+  --label-pad-y: 12mm;
+  --logo-size: 20mm;
+  --brand-name-size: 20pt;
+  --brand-city-size: 10pt;
+  --name-size: 30pt;
+  --ref-size: 11pt;
+  --old-size: 20pt;
+  --price-value-size: 70pt;
+  --price-currency-size: 36pt;
+  --expo-size: 24pt;
+  --footer-size: 11pt;
+}
+.orientation--landscape.sheet--count-2 {
+  --label-cols: 2;
+  --label-rows: 1;
+  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
+  --label-h: calc(var(--paper-h) - (var(--sheet-pad-y) * 2));
+}
+
+/* count-3 : 3 etiquettes M (portrait : 1 col x 3 lignes / paysage : 3 col x 1 ligne) */
+.sheet--count-3 {
+  --label-cols: 1;
+  --label-rows: 3;
+  --label-w: calc(var(--paper-w) - (var(--sheet-pad-x) * 2));
+  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - (var(--sheet-gap-y) * 2)) / 3);
+  --label-pad-x: 12mm;
+  --label-pad-y: 8mm;
+  --logo-size: 16mm;
+  --brand-name-size: 16pt;
+  --brand-city-size: 8.5pt;
+  --name-size: 22pt;
+  --ref-size: 10pt;
+  --old-size: 16pt;
+  --price-value-size: 52pt;
+  --price-currency-size: 28pt;
+  --expo-size: 18pt;
+  --footer-size: 9pt;
+}
+.orientation--landscape.sheet--count-3 {
+  --label-cols: 3;
+  --label-rows: 1;
+  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - (var(--sheet-gap-x) * 2)) / 3);
+  --label-h: calc(var(--paper-h) - (var(--sheet-pad-y) * 2));
+}
+
+/* count-4 : 4 etiquettes M (2 col x 2 lignes — meme grille en portrait et paysage) */
+.sheet--count-4 {
+  --label-cols: 2;
+  --label-rows: 2;
+  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
+  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - var(--sheet-gap-y)) / 2);
+  --label-pad-x: 8mm;
+  --label-pad-y: 9mm;
+  --logo-size: 14mm;
+  --brand-name-size: 15pt;
+  --brand-city-size: 7.5pt;
+  --name-size: 18pt;
+  --ref-size: 9pt;
+  --old-size: 14pt;
+  --price-value-size: 38pt;
+  --price-currency-size: 22pt;
+  --expo-size: 15pt;
+  --footer-size: 8pt;
+}
+
+/* count-5 : 5 etiquettes S (portrait : 2 col x 3 lignes, 5e centree en bas
+                              paysage : 3 col x 2 lignes, la 5e tombe en bas-milieu naturellement) */
+.sheet--count-5 {
+  --label-cols: 2;
+  --label-rows: 3;
+  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
+  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - (var(--sheet-gap-y) * 2)) / 3);
+  --label-pad-x: 6mm;
+  --label-pad-y: 6mm;
+  --logo-size: 12mm;
+  --brand-name-size: 12pt;
+  --brand-city-size: 6pt;
+  --name-size: 16pt;
+  --ref-size: 8pt;
+  --old-size: 12pt;
+  --price-value-size: 28pt;
+  --price-currency-size: 18pt;
+  --expo-size: 12pt;
+  --footer-size: 7pt;
+}
+.orientation--landscape.sheet--count-5 {
+  --label-cols: 3;
+  --label-rows: 2;
+  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - (var(--sheet-gap-x) * 2)) / 3);
+  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - var(--sheet-gap-y)) / 2);
+}
+
+/* count-6 : 6 etiquettes S (portrait : 2 col x 3 lignes / paysage : 3 col x 2 lignes) */
+.sheet--count-6 {
+  --label-cols: 2;
+  --label-rows: 3;
+  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - var(--sheet-gap-x)) / 2);
+  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - (var(--sheet-gap-y) * 2)) / 3);
+  --label-pad-x: 6mm;
+  --label-pad-y: 6mm;
+  --logo-size: 12mm;
+  --brand-name-size: 12pt;
+  --brand-city-size: 6pt;
+  --name-size: 16pt;
+  --ref-size: 8pt;
+  --old-size: 12pt;
+  --price-value-size: 28pt;
+  --price-currency-size: 18pt;
+  --expo-size: 12pt;
+  --footer-size: 7pt;
+}
+.orientation--landscape.sheet--count-6 {
+  --label-cols: 3;
+  --label-rows: 2;
+  --label-w: calc((var(--paper-w) - (var(--sheet-pad-x) * 2) - (var(--sheet-gap-x) * 2)) / 3);
+  --label-h: calc((var(--paper-h) - (var(--sheet-pad-y) * 2) - var(--sheet-gap-y)) / 2);
+}
+
+/* ============================================================
+   FORM — sous-titre des sections "Style de l'etiquette"
+   ============================================================ */
+.form__subtitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  color: var(--navy);
+  margin: 0.4rem 0 0.6rem;
+  letter-spacing: 0.3px;
+}
+
+/* ============================================================
+   PALETTE DE PASTILLES COULEUR (chips)
+   Utilise pour : couleur planche, fond etiquette, accent
+   ============================================================ */
+.chip-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+}
+@media (max-width: 1100px) {
+  .chip-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.chip-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+}
+.chip-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0; height: 0;
+}
+.chip {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--chip-color, #fff);
+  border: 2px solid var(--line);
+  box-shadow: inset 0 0 0 2px #fff;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.chip-option:hover .chip { transform: scale(1.08); }
+.chip-option input:checked + .chip {
+  border-color: var(--navy);
+  box-shadow: inset 0 0 0 2px #fff, 0 0 0 3px var(--navy-50);
+}
+.chip-option input:checked + .chip::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 10px; height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--navy);
+  box-shadow: 0 0 0 2px #fff;
+}
+.chip-option input:focus-visible + .chip {
+  outline: 2px solid var(--navy);
+  outline-offset: 3px;
+}
+.chip-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-transform: capitalize;
+  text-align: center;
+  white-space: nowrap;
+}
+.chip-option input:checked ~ .chip-label {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+/* Couleurs de planche */
+.chip--paper-white  { --chip-color: #ffffff; }
+.chip--paper-cream  { --chip-color: #faf6ee; }
+.chip--paper-kraft  { --chip-color: #e6d5b3; }
+.chip--paper-rose   { --chip-color: #fce4e6; }
+.chip--paper-sky    { --chip-color: #dee9f5; }
+.chip--paper-mint   { --chip-color: #ddedde; }
+
+/* Couleurs de fond etiquette */
+.chip--bg-white  { --chip-color: #ffffff; }
+.chip--bg-cream  { --chip-color: #faf6ee; }
+.chip--bg-sand   { --chip-color: #efe2c5; }
+.chip--bg-rose   { --chip-color: #fbe1e3; }
+.chip--bg-sky    { --chip-color: #d9e9f6; }
+.chip--bg-sage   { --chip-color: #dde7d8; }
+
+/* Couleurs d'accent (bloc prix) */
+.chip--accent-navy        { --chip-color: #1E3A8A; }
+.chip--accent-yellow      { --chip-color: #FACC15; }
+.chip--accent-red         { --chip-color: #c2362d; }
+.chip--accent-black       { --chip-color: #1a1a1a; }
+.chip--accent-forest      { --chip-color: #1d5b3a; }
+.chip--accent-terracotta  { --chip-color: #b85a3a; }
+
+/* Inverse le check pour les fonds tres clairs (plus visible) */
+.chip-option input:checked + .chip--bg-white::after,
+.chip-option input:checked + .chip--paper-white::after,
+.chip-option input:checked + .chip--accent-yellow::after {
+  background: var(--ink);
+}
+
+/* ============================================================
+   SELECTEUR DE BADGE (radio cards)
+   ============================================================ */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+}
+@media (min-width: 1200px) {
+  .badge-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.badge-option {
+  display: block;
+  cursor: pointer;
+}
+.badge-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0; height: 0;
+}
+.badge-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  width: 100%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.badge-card svg { flex: 0 0 auto; }
+.badge-option:hover .badge-card { border-color: var(--navy); }
+.badge-option input:checked + .badge-card {
+  border-color: var(--navy);
+  background: var(--navy-50);
+  color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.12);
+}
+.badge-option input:focus-visible + .badge-card {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+.badge-card--none { color: var(--muted); justify-content: center; }
+.badge-card--new      { color: #b07f00; }
+.badge-card--promo    { color: #c2362d; }
+.badge-card--love     { color: #be185d; }
+.badge-card--bio      { color: #1d5b3a; }
+.badge-card--local    { color: #b85a3a; }
+.badge-card--exclu    { color: #1a1a1a; }
+.badge-option input:checked + .badge-card--new      { color: #b07f00; background: #fef6dd; border-color: #f5c93a; }
+.badge-option input:checked + .badge-card--promo    { color: #fff; background: #c2362d; border-color: #c2362d; }
+.badge-option input:checked + .badge-card--love     { color: #fff; background: #ec4899; border-color: #ec4899; }
+.badge-option input:checked + .badge-card--bio      { color: #fff; background: #1d5b3a; border-color: #1d5b3a; }
+.badge-option input:checked + .badge-card--local    { color: #fff; background: #b85a3a; border-color: #b85a3a; }
+.badge-option input:checked + .badge-card--exclu    { color: var(--yellow); background: #1a1a1a; border-color: #1a1a1a; }
+
+/* ============================================================
+   SELECTEUR DE SYMBOLE DECORATIF (icon-only cards)
+   ============================================================ */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.4rem;
+}
+@media (max-width: 1100px) {
+  .icon-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.icon-option {
+  display: block;
+  cursor: pointer;
+}
+.icon-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0; height: 0;
+}
+.icon-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--navy);
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
+}
+.icon-card--none { color: var(--muted); }
+.icon-option:hover .icon-card {
+  border-color: var(--navy);
+  transform: scale(1.05);
+}
+.icon-option input:checked + .icon-card {
+  border-color: var(--navy);
+  background: var(--navy-50);
+  color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.12);
+}
+.icon-option input:checked + .icon-card--none {
+  color: var(--muted);
+  background: var(--cream);
+}
+.icon-option input:focus-visible + .icon-card {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   THEMING DE L'ETIQUETTE (par data-bg / data-accent)
+   --label-bg : couleur de fond ; --label-accent : couleur du bloc prix ;
+   --label-accent-fg : couleur du texte du bloc prix.
+   ============================================================ */
+.label[data-bg="white"]  { --label-bg: #ffffff; }
+.label[data-bg="cream"]  { --label-bg: #faf6ee; }
+.label[data-bg="sand"]   { --label-bg: #efe2c5; }
+.label[data-bg="rose"]   { --label-bg: #fbe1e3; }
+.label[data-bg="sky"]    { --label-bg: #d9e9f6; }
+.label[data-bg="sage"]   { --label-bg: #dde7d8; }
+
+.label[data-accent="navy"]       { --label-accent: #1E3A8A; --label-accent-fg: #ffffff; }
+.label[data-accent="yellow"]     { --label-accent: #FACC15; --label-accent-fg: #1a1a1a; }
+.label[data-accent="red"]        { --label-accent: #c2362d; --label-accent-fg: #ffffff; }
+.label[data-accent="black"]      { --label-accent: #1a1a1a; --label-accent-fg: #FACC15; }
+.label[data-accent="forest"]     { --label-accent: #1d5b3a; --label-accent-fg: #ffffff; }
+.label[data-accent="terracotta"] { --label-accent: #b85a3a; --label-accent-fg: #ffffff; }
+
+/* ============================================================
+   COULEUR DE PLANCHE (data-paper sur sheet-thumb / print-area)
+   ============================================================ */
+.sheet-thumb[data-paper="white"],
+.print-area[data-paper="white"]  { --paper-bg: #ffffff; }
+.sheet-thumb[data-paper="cream"],
+.print-area[data-paper="cream"]  { --paper-bg: #faf6ee; }
+.sheet-thumb[data-paper="kraft"],
+.print-area[data-paper="kraft"]  { --paper-bg: #e6d5b3; }
+.sheet-thumb[data-paper="rose"],
+.print-area[data-paper="rose"]   { --paper-bg: #fce4e6; }
+.sheet-thumb[data-paper="sky"],
+.print-area[data-paper="sky"]    { --paper-bg: #dee9f5; }
+.sheet-thumb[data-paper="mint"],
+.print-area[data-paper="mint"]   { --paper-bg: #ddedde; }
+
+/* ============================================================
+   BADGE PERSONNALISE SUR L'ETIQUETTE (pill au-dessus du brand)
+   Hidden par defaut, visible si data-badge est defini.
+   ============================================================ */
+.label__badge {
+  display: none; /* visible si .label[data-badge="..."] */
+  align-self: flex-start;
+  align-items: center;
+  gap: 1.5mm;
+  padding: 1mm 3mm 1mm 2.5mm;
+  margin-bottom: 1.5mm;
+  background: var(--badge-bg, var(--label-accent));
+  color: var(--badge-fg, var(--label-accent-fg));
+  border-radius: 999px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--badge-size, 8.5pt);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  width: max-content;
+  max-width: 100%;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+}
+.label__badge svg {
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+}
+.label[data-badge]:not([data-badge=""]) .label__badge { display: inline-flex; }
+
+/* Couleurs par type de badge (override --badge-bg / --badge-fg) */
+.label[data-badge="new"]    { --badge-bg: #FACC15; --badge-fg: #1a1a1a; }
+.label[data-badge="promo"]  { --badge-bg: #c2362d; --badge-fg: #ffffff; }
+.label[data-badge="love"]   { --badge-bg: #ec4899; --badge-fg: #ffffff; }
+.label[data-badge="bio"]    { --badge-bg: #1d5b3a; --badge-fg: #ffffff; }
+.label[data-badge="local"]  { --badge-bg: #b85a3a; --badge-fg: #ffffff; }
+.label[data-badge="exclu"]  { --badge-bg: #1a1a1a; --badge-fg: #FACC15; }
+
+/* Reduction de taille du badge selon le format */
+.sheet--count-1 .label__badge { font-size: 16pt; padding: 2.5mm 6mm 2.5mm 5mm; }
+.sheet--count-2 .label__badge { font-size: 12pt; padding: 1.8mm 4.5mm; }
+.sheet--count-3 .label__badge { font-size: 10pt; padding: 1.4mm 4mm; }
+.sheet--count-4 .label__badge { font-size: 9pt; padding: 1.2mm 3.5mm; }
+.sheet--count-5 .label__badge,
+.sheet--count-6 .label__badge { font-size: 7.5pt; padding: 0.8mm 2.5mm; }
+
+/* ============================================================
+   SYMBOLE DECORATIF SUR L'ETIQUETTE (corner bottom-right)
+   Place a l'oppose du bloc prix (qui est bottom-left) pour
+   eviter tout chevauchement. Couleur propre a chaque icone
+   (flamme=rouge, couronne=or, feuille=vert, etc.).
+   ============================================================ */
+.label__deco {
+  display: none; /* visible si .label[data-icon="..."] */
+  position: absolute;
+  bottom: var(--label-pad-y);
+  right: var(--label-pad-x);
+  width: var(--deco-size, 8mm);
+  height: var(--deco-size, 8mm);
+  color: var(--deco-color, var(--label-accent));
+  opacity: 0.95;
+  pointer-events: none;
+  z-index: 0;
+}
+.label__deco svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.18));
+}
+.label[data-icon]:not([data-icon=""]) .label__deco { display: block; }
+
+/* Quand EXPO est actif, le footer 'Vente en l'etat' prend la largeur en bas :
+   on remonte le symbole pour ne pas le croiser. */
+.label--expo .label__deco { bottom: calc(var(--label-pad-y) + 4mm); }
+
+/* Le bloc prix et le footer EXPO doivent rester au-dessus du symbole
+   meme si la zone de positionnement se chevauche par accident. */
+.label__prices,
+.label__footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Tailles du symbole par format (corner, plus petit qu'un filigrane) */
+.sheet--count-1 { --deco-size: 22mm; }
+.sheet--count-2 { --deco-size: 16mm; }
+.sheet--count-3 { --deco-size: 13mm; }
+.sheet--count-4 { --deco-size: 10mm; }
+.sheet--count-5 { --deco-size: 8mm; }
+.sheet--count-6 { --deco-size: 7mm; }
+
+/* Couleur thematique par icone (override --deco-color) */
+.label[data-icon="star"]     { --deco-color: #f59e0b; } /* or */
+.label[data-icon="heart"]    { --deco-color: #ec4899; } /* rose */
+.label[data-icon="flame"]    { --deco-color: #dc2626; } /* rouge */
+.label[data-icon="leaf"]     { --deco-color: #16a34a; } /* vert */
+.label[data-icon="sparkles"] { --deco-color: #facc15; } /* jaune */
+.label[data-icon="gift"]     { --deco-color: #be185d; } /* fuschia */
+.label[data-icon="crown"]    { --deco-color: #d4a017; } /* or fonce */
+
+/* Memes couleurs sur les vignettes du selecteur de symbole (form),
+   pour que l'utilisateur voie la couleur reelle avant de choisir. */
+.icon-grid .icon-option:nth-child(2) .icon-card { color: #f59e0b; }   /* star */
+.icon-grid .icon-option:nth-child(3) .icon-card { color: #ec4899; }   /* heart */
+.icon-grid .icon-option:nth-child(4) .icon-card { color: #dc2626; }   /* flame */
+.icon-grid .icon-option:nth-child(5) .icon-card { color: #16a34a; }   /* leaf */
+.icon-grid .icon-option:nth-child(6) .icon-card { color: #facc15; }   /* sparkles */
+.icon-grid .icon-option:nth-child(7) .icon-card { color: #be185d; }   /* gift */
+.icon-grid .icon-option:nth-child(8) .icon-card { color: #d4a017; }   /* crown */
+.icon-grid .icon-option:first-child .icon-card { color: var(--muted); } /* aucun */
