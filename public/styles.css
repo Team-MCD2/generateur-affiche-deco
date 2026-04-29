@@ -863,6 +863,120 @@ h1, h2, h3 {
 }
 
 /* ============================================================
+   RESPONSIVE — tablettes, telephones, tres petits ecrans
+   Le layout 3-cols est deja gere plus haut (1100px -> 2 cols,
+   720px -> 1 col). Ici on ajuste paddings, tailles, et echelles
+   du preview et de la planche pour que tout tienne sur un phone.
+   ============================================================ */
+
+/* Garde-fou anti-overflow horizontal partout (svg longs, labels) */
+html, body { overflow-x: hidden; }
+.panel, .field, .form, .preview-wrap, .sheet-thumb { min-width: 0; }
+
+/* --- Tablettes (≤ 900px) : on resserre tout --- */
+@media (max-width: 900px) {
+  .app-header {
+    padding: 0.85rem 1rem;
+    gap: 0.75rem;
+  }
+  .brand__logo { width: 44px; height: 44px; }
+  .brand__name { font-size: 1.3rem; }
+  .brand__city { font-size: 0.62rem; letter-spacing: 0.2em; }
+  .app-header__hint { font-size: 0.7rem; padding: 0.4rem 0.7rem; }
+
+  .app-grid { padding: 1rem; gap: 1rem; }
+  .panel { padding: 1rem 1rem 1.2rem; }
+  .panel__title { font-size: 1.08rem; }
+}
+
+/* --- Telephones (≤ 640px) : header empile, boutons plein-largeur, preview & planche reduits --- */
+@media (max-width: 640px) {
+  /* Header : stack vertical, hint sur sa propre ligne */
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+    padding: 0.75rem 0.9rem;
+  }
+  .app-header__actions { width: 100%; }
+  .app-header__hint {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+  }
+
+  /* Layout : marges fines */
+  .app-grid { padding: 0.75rem; gap: 0.75rem; }
+  .panel { padding: 0.9rem 0.85rem 1rem; }
+  .panel__title { font-size: 1rem; margin-bottom: 0.85rem; }
+
+  /* Champs prix cote-a-cote -> empiles */
+  .field-row { grid-template-columns: 1fr; gap: 0.5rem; }
+
+  /* Selecteur de format : 3 cartes plus compactes */
+  .format-grid { gap: 0.4rem; }
+  .format-card { padding: 0.55rem 0.35rem 0.4rem; gap: 0.35rem; }
+  .format-card__num { font-size: 1.05rem; }
+  .format-card__layout { width: 26px; height: 36px; }
+  .format-card__text { font-size: 0.58rem; letter-spacing: 0.14em; }
+
+  /* Selecteur d'orientation : padding reduit */
+  .orient-card { padding: 0.55rem 0.4rem; gap: 0.3rem; }
+  .orient-card__label { font-size: 0.85rem; }
+  .orient-card__hint { font-size: 0.62rem; letter-spacing: 0.06em; }
+
+  /* Form actions : boutons plein-largeur en colonne */
+  .form__actions { flex-direction: column; gap: 0.5rem; }
+  .form__actions .btn { width: 100%; justify-content: center; }
+
+  /* Panel sheet : header empile + boutons en ligne plein-largeur */
+  .panel__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+  .panel__tools { display: flex; }
+  .panel__tools .btn { flex: 1; justify-content: center; }
+
+  /* Apercu : echelles reduites pour tenir sur viewport ~360-400px */
+  .preview-wrap.orientation--portrait.sheet--count-1  { --preview-scale: 0.32; }
+  .preview-wrap.orientation--portrait.sheet--count-2,
+  .preview-wrap.orientation--portrait.sheet--count-3  { --preview-scale: 0.36; }
+  .preview-wrap.orientation--portrait.sheet--count-4  { --preview-scale: 0.65; }
+  .preview-wrap.orientation--portrait.sheet--count-5,
+  .preview-wrap.orientation--portrait.sheet--count-6  { --preview-scale: 0.72; }
+  .preview-wrap.orientation--landscape.sheet--count-1 { --preview-scale: 0.24; }
+  .preview-wrap.orientation--landscape.sheet--count-2,
+  .preview-wrap.orientation--landscape.sheet--count-3 { --preview-scale: 0.45; }
+  .preview-wrap.orientation--landscape.sheet--count-4 { --preview-scale: 0.50; }
+  .preview-wrap.orientation--landscape.sheet--count-5,
+  .preview-wrap.orientation--landscape.sheet--count-6 { --preview-scale: 0.72; }
+
+  /* Vignette planche A4 : echelle reduite pour tenir dans la colonne */
+  .sheet-thumb { --thumb-scale: 0.32; }
+  .sheet-thumb.orientation--landscape { --thumb-scale: 0.22; }
+}
+
+/* --- Tres petits ecrans (≤ 380px) : derniere passe --- */
+@media (max-width: 380px) {
+  .app-header { padding: 0.65rem 0.75rem; }
+  .brand__logo { width: 36px; height: 36px; }
+  .brand__name { font-size: 1.15rem; }
+
+  .app-grid { padding: 0.6rem; gap: 0.6rem; }
+  .panel { padding: 0.75rem 0.7rem 0.85rem; }
+
+  .format-card__num { font-size: 0.95rem; }
+  .format-card__layout { width: 22px; height: 30px; }
+
+  .chip-grid { grid-template-columns: repeat(2, 1fr); }
+  .icon-grid  { grid-template-columns: repeat(4, 1fr); }
+
+  .sheet-thumb { --thumb-scale: 0.27; }
+  .sheet-thumb.orientation--landscape { --thumb-scale: 0.19; }
+}
+
+/* ============================================================
    @media print : la magie de l'impression A4
    ============================================================ */
 @media print {
