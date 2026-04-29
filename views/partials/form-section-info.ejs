@@ -1,0 +1,57 @@
+<!-- ============================================================ -->
+<!-- FORM > Section "Produit" : nom, reference, prix             -->
+<!-- ============================================================ -->
+
+<div class="field">
+  <label for="f-name">Nom du produit <span class="required">*</span></label>
+  <input
+    id="f-name"
+    name="name"
+    type="text"
+    required
+    maxlength="80"
+    placeholder="Ex. Lanterne marocaine en laiton"
+    autocomplete="off"
+  />
+  <small class="hint">Max 80 caracteres. Tient sur 2 lignes.</small>
+</div>
+
+<div class="field">
+  <label for="f-ref">Reference / SKU <span class="optional">(optionnel)</span></label>
+  <input
+    id="f-ref"
+    name="ref"
+    type="text"
+    maxlength="20"
+    placeholder="Ex. LM-1042"
+    autocomplete="off"
+  />
+</div>
+
+<div class="field-row">
+  <div class="field">
+    <label for="f-price">Prix actuel (€) <span class="required">*</span></label>
+    <input
+      id="f-price"
+      name="price"
+      type="number"
+      required
+      min="0"
+      step="0.01"
+      placeholder="59"
+      inputmode="decimal"
+    />
+  </div>
+  <div class="field">
+    <label for="f-old">Prix avant promo (€) <span class="optional">(optionnel)</span></label>
+    <input
+      id="f-old"
+      name="oldPrice"
+      type="number"
+      min="0"
+      step="0.01"
+      placeholder="89"
+      inputmode="decimal"
+    />
+  </div>
+</div>

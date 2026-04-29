@@ -1,0 +1,33 @@
+<!-- ====================================================== -->
+<!-- TEMPLATE D'UNE ETIQUETTE                                -->
+<!-- (clone par JS via document.getElementById('labelTemplate').content)
+<!-- ====================================================== -->
+<template id="labelTemplate">
+  <div class="label" role="figure" aria-label="Etiquette produit">
+    <div class="label__expo" data-expo>EXPO</div>
+    <div class="label__badge" data-badge-slot></div>
+    <div class="label__deco" data-icon-slot aria-hidden="true"></div>
+    <div class="label__brand">
+      <img class="label__brand-logo" src="/assets/logo.png" alt="DecoShop" />
+      <div class="label__brand-text">
+        <span class="label__brand-name">DecoShop</span>
+        <span class="label__brand-city">Toulouse</span>
+      </div>
+    </div>
+    <div class="label__name" data-name>Nom du produit</div>
+    <div class="label__ref" data-ref></div>
+    <div class="label__prices">
+      <div class="label__old" data-old></div>
+      <div class="label__price">
+        <span class="label__price-value" data-price>0</span>
+        <span class="label__price-currency">€</span>
+      </div>
+    </div>
+    <div class="label__footer">
+      <span>Vente en l'etat — modele d'exposition</span>
+    </div>
+    <button class="label__remove" type="button" aria-label="Retirer cette etiquette">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+</template>
