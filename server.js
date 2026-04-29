@@ -16,7 +16,6 @@ const app = express();
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const VIEWS_DIR  = path.join(__dirname, 'views');
 const THEME_LOGO = path.join(__dirname, '..', 'theme', 'assets', 'logo.png');
-const FALLBACK_LOGO = path.join(PUBLIC_DIR, 'logo.png');
 
 // View engine : EJS (partials via <%- include('partials/x') %>)
 app.set('view engine', 'ejs');
@@ -27,22 +26,21 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-// 1) Serve static files (CSS, JS, assets)
-//    'index: false' empeche express.static de servir un eventuel index.html
-//    a la racine, pour que notre route GET / (EJS) gagne la priorite.
-app.use(express.static(PUBLIC_DIR, { index: false }));
-
-// 2) Logo: on essaie d'abord le logo du theme Shopify (source unique de verite),
-//    sinon on retombe sur une copie locale dans public/.
-app.get('/assets/logo.png', (req, res) => {
+// 1) Logo : on essaie d'abord le theme Shopify (source unique de verite en dev local).
+//    Si le dossier theme/ n'est pas la (cas d'un deploiement Vercel ou le seul
+//    dossier 'generateur/' est embarque), on delegue a express.static qui servira
+//    public/assets/logo.png (copie bundlee).
+app.get('/assets/logo.png', (req, res, next) => {
   if (fs.existsSync(THEME_LOGO)) {
     return res.sendFile(THEME_LOGO);
   }
-  if (fs.existsSync(FALLBACK_LOGO)) {
-    return res.sendFile(FALLBACK_LOGO);
-  }
-  res.status(404).send('Logo not found.');
+  next();
 });
+
+// 2) Serve static files (CSS, JS, assets — dont public/assets/logo.png)
+//    'index: false' empeche express.static de servir un eventuel index.html
+//    a la racine, pour que notre route GET / (EJS) gagne la priorite.
+app.use(express.static(PUBLIC_DIR, { index: false }));
 
 // 3) Healthcheck
 app.get('/health', (req, res) => res.json({ ok: true, version: require('./package.json').version }));
