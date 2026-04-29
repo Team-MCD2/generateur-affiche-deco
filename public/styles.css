@@ -661,11 +661,12 @@ h1, h2, h3 {
 .label--expo .label__expo { display: block; }
 
 /* Quand EXPO est actif, on reserve a droite l'espace occupe par le tag
-   pour que le nom et la marque ne se retrouvent pas dessous. La taille
-   est proportionnelle a --expo-size (qui scale deja par format). */
+   pour que le nom et la marque ne se retrouvent pas dessous. Le badge fait
+   approximativement (expo-size * 2.94 em pour le texte + 9mm de padding),
+   et le clip-path s'arrete a 30% : on dimensionne la marge en consequence. */
 .label--expo .label__brand,
 .label--expo .label__name {
-  padding-right: calc(var(--expo-size) * 1.6);
+  padding-right: calc(var(--expo-size) * 2.6 + 5mm);
 }
 
 /* Brand mini (logo + nom en haut) */
