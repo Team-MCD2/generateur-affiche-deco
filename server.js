@@ -15,7 +15,7 @@ const app = express();
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const VIEWS_DIR  = path.join(__dirname, 'views');
-const THEME_LOGO = path.join(__dirname, '..', 'theme', 'assets', 'logo.png');
+const THEME_ASSETS = path.join(__dirname, '..', 'theme', 'assets');
 
 // View engine : EJS (partials via <%- include('partials/x') %>)
 app.set('view engine', 'ejs');
@@ -26,26 +26,35 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-// 1) Logo : on essaie d'abord le theme Shopify (source unique de verite en dev local).
-//    Si le dossier theme/ n'est pas la (cas d'un deploiement Vercel ou le seul
-//    dossier 'generateur/' est embarque), on delegue a express.static qui servira
-//    public/assets/logo.png (copie bundlee).
-app.get('/assets/logo.png', (req, res, next) => {
-  if (fs.existsSync(THEME_LOGO)) {
-    return res.sendFile(THEME_LOGO);
+// 1) Favicon : sert le .ico officiel directement (les navigateurs requetent
+//    /favicon.ico a la racine par convention). Fallback 204 si absent.
+app.get('/favicon.ico', (req, res) => {
+  const ico = path.join(PUBLIC_DIR, 'assets', 'favicon.ico');
+  if (fs.existsSync(ico)) return res.sendFile(ico);
+  res.status(204).end();
+});
+
+// 2) Assets : passe-plat vers le theme Shopify (source unique de verite en dev local).
+//    Si le dossier theme/ n'est pas la (deploiement Vercel ou seul 'generateur/'
+//    est embarque), on delegue a express.static qui servira la copie bundlee
+//    dans public/assets/.
+app.use('/assets', (req, res, next) => {
+  const themeFile = path.join(THEME_ASSETS, req.path);
+  if (fs.existsSync(themeFile) && fs.statSync(themeFile).isFile()) {
+    return res.sendFile(themeFile);
   }
   next();
 });
 
-// 2) Serve static files (CSS, JS, assets — dont public/assets/logo.png)
+// 3) Serve static files (CSS, JS, public/assets/* en fallback)
 //    'index: false' empeche express.static de servir un eventuel index.html
 //    a la racine, pour que notre route GET / (EJS) gagne la priorite.
 app.use(express.static(PUBLIC_DIR, { index: false }));
 
-// 3) Healthcheck
+// 4) Healthcheck
 app.get('/health', (req, res) => res.json({ ok: true, version: require('./package.json').version }));
 
-// 4) 404
+// 5) 404
 app.use((req, res) => {
   res.status(404).send('Not found.');
 });
