@@ -196,13 +196,9 @@
     const modeEl = clone.querySelector('[data-mode]');
     if (modeEl) modeEl.textContent = data.expo ? 'Modele expose' : 'En magasin';
 
-    // QR code (URL produit Shopify ou autre)
-    const qrSlot = clone.querySelector('[data-qr]');
-    refreshQR(qrSlot, data.productUrl);
-    // Si la lib QRCode arrive en retard, on retente une fois
-    if (qrSlot && data.productUrl && typeof window.QRCode === 'undefined') {
-      setTimeout(() => refreshQR(qrSlot, data.productUrl), 300);
-    }
+    // QR code : ne plus générer automatiquement, attendre le clic du bouton
+    // const qrSlot = clone.querySelector('[data-qr]');
+    // refreshQR(qrSlot, data.productUrl);
   }
 
   // ============================================================
@@ -555,6 +551,20 @@
       // setTimeout pour laisser le form HTML se reset avant relecture
       setTimeout(render, 0);
     });
+
+    // Bouton generer QR code
+    const btnGenerateQR = document.getElementById('btn-generate-qr');
+    if (btnGenerateQR) {
+      btnGenerateQR.addEventListener('click', () => {
+        const data = readForm();
+        const qrSlot = document.querySelector('#livePoster [data-qr]');
+        if (qrSlot && data.productUrl) {
+          refreshQR(qrSlot, data.productUrl);
+        } else {
+          alert('Veuillez entrer une URL produit d\'abord.');
+        }
+      });
+    }
 
     // Sync multi-onglets : si le storage change ailleurs, on reflete
     window.addEventListener('storage', (e) => {

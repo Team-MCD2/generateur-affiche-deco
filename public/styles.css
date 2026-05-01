@@ -421,7 +421,7 @@ html, body { overflow-x: hidden; }
 .picker[data-state="loading"]  .picker__loading { display: flex; }
 .picker[data-state="idle"]     .picker__search  { display: block; }
 .picker[data-state="selected"] .picker__chip    { display: flex; }
-.picker[data-state="manual"]   .picker__manual  { display: block; }
+.picker[data-state="manual"]   .picker__manual  { display: flex; gap: 0.5rem; }
 
 /* ---- Loading state ---------------------------------------- */
 .picker__loading {
@@ -623,6 +623,27 @@ html, body { overflow-x: hidden; }
   outline: 0;
   border-color: var(--navy);
   box-shadow: 0 0 0 3px var(--navy-50);
+}
+
+.picker__generate-btn {
+  flex-shrink: 0;
+  padding: 0.6rem 1rem;
+  background: var(--navy);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.picker__generate-btn:hover {
+  background: #0f2855;
+}
+
+.picker__generate-btn:active {
+  background: #0a1d3d;
 }
 
 /* ---- Hint footer + toggle --------------------------------- */
