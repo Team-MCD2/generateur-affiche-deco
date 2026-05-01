@@ -492,6 +492,15 @@
       refs.clear       && refs.clear.addEventListener('click', onClear);
       refs.manualInput && refs.manualInput.addEventListener('input', onManualInput);
 
+      // Ecoute du reset du formulaire pour vider le composant
+      form.addEventListener('reset', () => {
+        // setTimeout pour s'exécuter après le reset natif du navigateur
+        setTimeout(() => {
+          clearResults();
+          setState(configured ? 'idle' : 'manual');
+        }, 0);
+      });
+
       // Recupere l'etat de la connexion Shopify
       try {
         const r = await shopifyFetch('/api/shopify/status');
@@ -557,6 +566,7 @@
     // Reset -> on re-render avec valeurs vides + on efface le storage
     btnReset?.addEventListener('click', () => {
       try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      currentQrUrl = null; // Réinitialise l'état du QR code
       // setTimeout pour laisser le form HTML se reset avant relecture
       setTimeout(render, 0);
     });
