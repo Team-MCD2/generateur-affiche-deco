@@ -171,12 +171,9 @@ async function searchProducts(q, opts = {}) {
     const price    = variant && variant.price          ? Number(variant.price)          : null;
     const oldPrice = variant && variant.compareAtPrice ? Number(variant.compareAtPrice) : null;
 
-    // URL publique : prefere onlineStoreUrl (genere par Shopify), sinon
-    // construit depuis le host (publicDomain ou shop).
-    let url = node.onlineStoreUrl;
-    if (!url) {
-      url = `https://${host}/products/${node.handle}`;
-    }
+    // URL publique : on la construit depuis le host (publicDomain ou shop)
+    // pour garantir qu'on utilise le domaine souhaite.
+    let url = `https://${host}/products/${node.handle}`;
 
     return {
       id:       node.id,
