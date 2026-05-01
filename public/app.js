@@ -21,6 +21,8 @@
   // 297mm a 96 dpi = 297 * 96 / 25.4 = 1122.52 px (largeur reelle A4 paysage)
   const POSTER_PX_WIDTH = (297 * 96) / 25.4;
 
+  let currentQrUrl = null; // State pour retenir si on doit générer le QR code
+
   // ----- Refs DOM ------------------------------------------------------------
   const form        = document.getElementById('labelForm');
   const previewWrap = document.getElementById('previewWrap');
@@ -196,9 +198,11 @@
     const modeEl = clone.querySelector('[data-mode]');
     if (modeEl) modeEl.textContent = data.expo ? 'Modele expose' : 'En magasin';
 
-    // QR code : ne plus générer automatiquement, attendre le clic du bouton
-    // const qrSlot = clone.querySelector('[data-qr]');
-    // refreshQR(qrSlot, data.productUrl);
+    // QR code : générer si l'utilisateur a cliqué sur le bouton pour cette URL
+    const qrSlot = clone.querySelector('[data-qr]');
+    if (data.productUrl && data.productUrl === currentQrUrl) {
+      refreshQR(qrSlot, data.productUrl);
+    }
   }
 
   // ============================================================
@@ -541,12 +545,10 @@
         errEl.hidden = false;
         return;
       }
-      // Generer le QR code avant impression si URL fournie
+      // Generer le QR code avant impression si URL fournie (pour être sûr)
       if (data.productUrl) {
-        const qrSlot = document.querySelector('#livePoster [data-qr]');
-        if (qrSlot) {
-          refreshQR(qrSlot, data.productUrl);
-        }
+        currentQrUrl = data.productUrl;
+        render(); // Met à jour le DOM avec le QR code
       }
       // Petit timeout pour laisser le QR se generer et le DOM se stabiliser
       setTimeout(() => window.print(), 300);
@@ -564,9 +566,9 @@
     if (btnGenerateQR) {
       btnGenerateQR.addEventListener('click', () => {
         const data = readForm();
-        const qrSlot = document.querySelector('#livePoster [data-qr]');
-        if (qrSlot && data.productUrl) {
-          refreshQR(qrSlot, data.productUrl);
+        if (data.productUrl) {
+          currentQrUrl = data.productUrl;
+          render(); // Déclenche un rendu qui inclura le QR code
         } else {
           alert('Veuillez entrer une URL produit d\'abord.');
         }
