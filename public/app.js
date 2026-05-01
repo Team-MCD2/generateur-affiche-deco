@@ -34,6 +34,26 @@
     return;
   }
 
+  // ---------------------------------------------------------------------------
+  // Fetch authentifie : en mode embedded (App Bridge), on attache le session
+  // token JWT genere par App Bridge en header Authorization. En mode standalone
+  // on retombe sur fetch tel quel.
+  // ---------------------------------------------------------------------------
+  async function shopifyFetch(url, options = {}) {
+    const cfg = window.__DECOSHOP || {};
+    if (cfg.embedded && window.shopify && typeof window.shopify.idToken === 'function') {
+      try {
+        const token = await window.shopify.idToken();
+        const headers = new Headers(options.headers || {});
+        headers.set('Authorization', `Bearer ${token}`);
+        return fetch(url, Object.assign({}, options, { headers }));
+      } catch (err) {
+        console.warn('[shopify] idToken() echec, fetch sans auth', err);
+      }
+    }
+    return fetch(url, options);
+  }
+
   // ============================================================
   // 1) Lecture du formulaire
   // ============================================================
@@ -45,14 +65,15 @@
     const oldRaw   = get('oldPrice').replace(',', '.');
 
     return {
-      name:     get('name'),
-      ref:      get('ref'),
-      price:    priceRaw === '' ? null : Number(priceRaw),
-      oldPrice: oldRaw   === '' ? null : Number(oldRaw),
-      eyebrow:  get('eyebrow'),
-      pitch:    get('pitch'),
-      promo:    get('promo') === 'on',
-      expo:     fd.get('expo') === 'on'
+      name:       get('name'),
+      ref:        get('ref'),
+      productUrl: get('productUrl'),
+      price:      priceRaw === '' ? null : Number(priceRaw),
+      oldPrice:   oldRaw   === '' ? null : Number(oldRaw),
+      eyebrow:    get('eyebrow'),
+      pitch:      get('pitch'),
+      promo:      get('promo') === 'on',
+      expo:       fd.get('expo') === 'on'
     };
   }
 
@@ -84,6 +105,32 @@
   function discountPct(oldP, currP) {
     if (!oldP || !currP || oldP <= currP) return 0;
     return Math.round(((oldP - currP) / oldP) * 100);
+  }
+
+  // Generation QR code (URL produit Shopify ou autre).
+  // Utilise la lib globale QRCode (chargee via CDN avec defer).
+  // Si pas d'URL ou lib indispo : on vide le slot pour montrer le placeholder.
+  function refreshQR(targetEl, url) {
+    if (!targetEl) return;
+    targetEl.innerHTML = '';
+    if (!url || !/^https?:\/\//i.test(url)) return;
+    if (typeof window.QRCode === 'undefined') {
+      // Lib pas encore chargee : on retentera au prochain render
+      return;
+    }
+    window.QRCode.toDataURL(url, {
+      width: 600,
+      margin: 0,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#1E3A8A', light: '#ffffff' }
+    }).then(dataUrl => {
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      img.alt = 'QR code produit';
+      targetEl.appendChild(img);
+    }).catch(err => {
+      console.warn('[qr] generation echouee', err);
+    });
   }
 
   // ============================================================
@@ -148,6 +195,14 @@
     // Footer mode (texte adapte si expo)
     const modeEl = clone.querySelector('[data-mode]');
     if (modeEl) modeEl.textContent = data.expo ? 'Modele expose' : 'En magasin';
+
+    // QR code (URL produit Shopify ou autre)
+    const qrSlot = clone.querySelector('[data-qr]');
+    refreshQR(qrSlot, data.productUrl);
+    // Si la lib QRCode arrive en retard, on retente une fois
+    if (qrSlot && data.productUrl && typeof window.QRCode === 'undefined') {
+      setTimeout(() => refreshQR(qrSlot, data.productUrl), 300);
+    }
   }
 
   // ============================================================
@@ -230,23 +285,251 @@
       }
     };
 
-    setVal('name',     data.name);
-    setVal('ref',      data.ref);
-    setVal('price',    data.price);
-    setVal('oldPrice', data.oldPrice);
-    setVal('eyebrow',  data.eyebrow);
-    setVal('pitch',    data.pitch);
-    setVal('promo',    data.promo ? 'on' : 'off');
-    setVal('expo',     data.expo);
+    setVal('name',       data.name);
+    setVal('ref',        data.ref);
+    setVal('productUrl', data.productUrl);
+    setVal('price',      data.price);
+    setVal('oldPrice',   data.oldPrice);
+    setVal('eyebrow',    data.eyebrow);
+    setVal('pitch',      data.pitch);
+    setVal('promo',      data.promo ? 'on' : 'off');
+    setVal('expo',       data.expo);
   }
 
   // ============================================================
-  // 8) Wiring evenements
+  // 8) Picker produit Shopify (encapsule dans un module)
+  // ============================================================
+  const ShopifyPicker = (() => {
+    const root = document.querySelector('[data-shopify-picker]');
+    if (!root) return { init: () => {} };
+
+    const refs = {
+      input:       root.querySelector('.picker__input'),
+      results:     root.querySelector('[data-picker-results]'),
+      chipImg:     root.querySelector('[data-picker-chip-img]'),
+      chipTitle:   root.querySelector('[data-picker-chip-title]'),
+      chipMeta:    root.querySelector('[data-picker-chip-meta]'),
+      clear:       root.querySelector('[data-picker-clear]'),
+      manualInput: root.querySelector('.picker__manual-input'),
+      toggle:      root.querySelector('[data-picker-toggle]'),
+      status:      root.querySelector('[data-picker-status]'),
+      urlHidden:   root.querySelector('#f-product-url')
+    };
+
+    let configured = false;
+    let shopName = null;
+    let searchTimer = null;
+
+    // ---- Helpers UI -----------------------------------------------------
+    const escapeHtml = (s) =>
+      String(s == null ? '' : s).replace(/[&<>"']/g, (m) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])
+      );
+
+    function setState(s) {
+      root.dataset.state = s;
+      if (refs.toggle) {
+        if (s === 'manual' && configured) {
+          refs.toggle.textContent = 'Rechercher dans Shopify';
+          refs.toggle.hidden = false;
+        } else if (s === 'idle' || s === 'selected') {
+          refs.toggle.textContent = 'Saisir une URL manuellement';
+          refs.toggle.hidden = false;
+        } else {
+          refs.toggle.hidden = true;
+        }
+      }
+    }
+
+    function setStatus(text) {
+      if (refs.status) refs.status.textContent = text;
+    }
+
+    // Met a jour le hidden URL et notifie app.js (saveState + render)
+    function setUrl(url) {
+      if (!refs.urlHidden) return;
+      refs.urlHidden.value = url || '';
+      form.dispatchEvent(new Event('input', { bubbles: false }));
+    }
+
+    // Pre-remplissage du formulaire depuis un produit Shopify.
+    // Ecrase silencieusement les champs : c'est le but du picker.
+    function autoFillFromProduct(p) {
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = (val == null || val === '') ? '' : val;
+      };
+      setVal('f-name',  p.title || '');
+      setVal('f-ref',   p.sku   || '');
+      setVal('f-price', p.price    != null ? p.price    : '');
+      setVal('f-old',   p.oldPrice != null ? p.oldPrice : '');
+    }
+
+    // ---- Rendu des resultats -------------------------------------------
+    function clearResults() {
+      if (!refs.results) return;
+      refs.results.innerHTML = '';
+      refs.results.hidden = true;
+    }
+
+    function renderResults(products) {
+      if (!refs.results) return;
+      refs.results.innerHTML = '';
+      if (!products.length) {
+        const li = document.createElement('li');
+        li.className = 'picker__result picker__result--empty';
+        li.textContent = 'Aucun produit trouve.';
+        refs.results.appendChild(li);
+        refs.results.hidden = false;
+        return;
+      }
+      for (const p of products) {
+        const li = document.createElement('li');
+        li.className = 'picker__result';
+        li.setAttribute('role', 'option');
+        li.tabIndex = 0;
+        const priceTxt = p.price != null
+          ? p.price.toString().replace('.', ',') + ' €'
+          : '—';
+        const skuTxt = p.sku ? escapeHtml(p.sku) + ' · ' : '';
+        const imgHtml = p.image
+          ? `<img class="picker__result-img" src="${escapeHtml(p.image)}" alt="" loading="lazy" />`
+          : '<span class="picker__result-img picker__result-img--placeholder" aria-hidden="true"></span>';
+        li.innerHTML = `
+          ${imgHtml}
+          <div class="picker__result-text">
+            <strong>${escapeHtml(p.title)}</strong>
+            <span>${skuTxt}${priceTxt}</span>
+          </div>
+        `;
+        li.addEventListener('click', () => onSelect(p));
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(p); }
+        });
+        refs.results.appendChild(li);
+      }
+      refs.results.hidden = false;
+    }
+
+    // ---- Selection produit ---------------------------------------------
+    function onSelect(p) {
+      setState('selected');
+      // Chip
+      if (refs.chipImg) {
+        if (p.image) {
+          refs.chipImg.src = p.image;
+          refs.chipImg.style.display = '';
+        } else {
+          refs.chipImg.removeAttribute('src');
+          refs.chipImg.style.display = 'none';
+        }
+      }
+      if (refs.chipTitle) refs.chipTitle.textContent = p.title || 'Produit';
+      if (refs.chipMeta) {
+        const priceTxt = p.price != null ? p.price.toString().replace('.', ',') + ' €' : '';
+        refs.chipMeta.textContent = [p.sku, priceTxt].filter(Boolean).join(' · ');
+      }
+      // Form values (autofill + URL)
+      autoFillFromProduct(p);
+      setUrl(p.url);
+      clearResults();
+      if (refs.input) refs.input.value = '';
+    }
+
+    // ---- Recherche -----------------------------------------------------
+    async function doSearch(q) {
+      try {
+        const r = await shopifyFetch('/api/shopify/products?q=' + encodeURIComponent(q));
+        if (!r.ok) { clearResults(); return; }
+        const data = await r.json();
+        renderResults(data.products || []);
+      } catch (err) {
+        console.warn('[picker] recherche echouee', err);
+        clearResults();
+      }
+    }
+
+    function onSearchInput() {
+      clearTimeout(searchTimer);
+      const q = (refs.input.value || '').trim();
+      if (q.length < 1) { clearResults(); return; }
+      searchTimer = setTimeout(() => doSearch(q), 250);
+    }
+
+    // ---- Bascules ------------------------------------------------------
+    function onToggle() {
+      if (root.dataset.state === 'manual') {
+        setState('idle');
+        clearResults();
+        if (refs.input) { refs.input.value = ''; refs.input.focus(); }
+      } else {
+        setState('manual');
+        if (refs.manualInput) {
+          refs.manualInput.value = refs.urlHidden ? refs.urlHidden.value : '';
+          refs.manualInput.focus();
+        }
+      }
+    }
+
+    function onClear() {
+      setUrl('');
+      if (refs.input) refs.input.value = '';
+      if (refs.manualInput) refs.manualInput.value = '';
+      clearResults();
+      setState(configured ? 'idle' : 'manual');
+    }
+
+    function onManualInput() {
+      setUrl((refs.manualInput.value || '').trim());
+    }
+
+    // ---- Init ----------------------------------------------------------
+    async function init() {
+      // Wiring evenements
+      refs.input       && refs.input.addEventListener('input', onSearchInput);
+      refs.toggle      && refs.toggle.addEventListener('click', onToggle);
+      refs.clear       && refs.clear.addEventListener('click', onClear);
+      refs.manualInput && refs.manualInput.addEventListener('input', onManualInput);
+
+      // Recupere l'etat de la connexion Shopify
+      try {
+        const r = await shopifyFetch('/api/shopify/status');
+        const status = await r.json();
+        configured = !!status.configured;
+        shopName = status.shop || null;
+      } catch (_) {
+        configured = false;
+      }
+
+      // Etat initial selon l'URL deja restauree par loadState()
+      const savedUrl = (refs.urlHidden && refs.urlHidden.value) || '';
+      if (savedUrl) {
+        setState('manual');
+        if (refs.manualInput) refs.manualInput.value = savedUrl;
+      } else {
+        setState(configured ? 'idle' : 'manual');
+      }
+
+      // Message de statut
+      if (configured) {
+        setStatus(`Connecte a ${shopName}. Choisis un produit ou saisis une URL.`);
+      } else {
+        setStatus("Shopify non connecte — saisis l'URL produit manuellement.");
+      }
+    }
+
+    return { init };
+  })();
+
+  // ============================================================
+  // 9) Wiring evenements
   // ============================================================
   function init() {
     loadState();
     render();
     watchPreviewResize();
+    ShopifyPicker.init();
 
     // Render live a chaque changement
     form.addEventListener('input',  () => { saveState(); render(); });

@@ -27,12 +27,28 @@
     <!-- MAIN : 60% editorial / 40% bloc prix jaune -->
     <main class="poster__main">
 
-      <!-- Bloc de gauche : chapeau + nom + reference + accroche -->
+      <!-- Bloc de gauche : editorial en haut, module QR ancre en bas -->
       <section class="poster__content">
-        <span class="poster__eyebrow" data-eyebrow>Coup de coeur</span>
-        <h1 class="poster__name" data-name>Nom du produit</h1>
-        <div class="poster__ref" data-ref></div>
-        <div class="poster__pitch" data-pitch>Decouvrez nos nouveautes en magasin a Toulouse.</div>
+
+        <!-- Editorial : chapeau + nom + reference + accroche -->
+        <div class="poster__content-top">
+          <span class="poster__eyebrow" data-eyebrow>Coup de coeur</span>
+          <h1 class="poster__name" data-name>Nom du produit</h1>
+          <div class="poster__ref" data-ref></div>
+          <div class="poster__pitch" data-pitch>Decouvrez nos nouveautes en magasin a Toulouse.</div>
+        </div>
+
+        <!-- Module QR : pousse en bas via flex space-between -->
+        <div class="poster__qr" data-qr-module>
+          <div class="poster__qr-code" data-qr>
+            <!-- Image QR injectee par JS si URL produit fournie -->
+          </div>
+          <div class="poster__qr-label">
+            <strong>Scanner pour la fiche produit</strong>
+            <span>DecoShop Toulouse · Disponible en ligne</span>
+          </div>
+        </div>
+
       </section>
 
       <!-- Bloc de droite : prix hero (jaune) + ruban promo si data-promo -->
