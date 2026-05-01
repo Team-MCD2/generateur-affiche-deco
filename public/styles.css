@@ -125,9 +125,16 @@ html, body { overflow-x: hidden; }
   align-items: start;
 }
 
-/* Apercu normal (non sticky) pour eviter l'effet "bloque" au defilement */
+/* Apercu sticky en desktop : on garde l'affiche visible quand
+   on scrolle dans le formulaire. */
 @media (min-width: 1101px) {
-  
+  .panel--preview {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
 }
 
 /* ============================================================
