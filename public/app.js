@@ -541,8 +541,15 @@
         errEl.hidden = false;
         return;
       }
-      // Petit timeout pour laisser le DOM se stabiliser apres un focus
-      setTimeout(() => window.print(), 60);
+      // Generer le QR code avant impression si URL fournie
+      if (data.productUrl) {
+        const qrSlot = document.querySelector('#livePoster [data-qr]');
+        if (qrSlot) {
+          refreshQR(qrSlot, data.productUrl);
+        }
+      }
+      // Petit timeout pour laisser le QR se generer et le DOM se stabiliser
+      setTimeout(() => window.print(), 300);
     });
 
     // Reset -> on re-render avec valeurs vides + on efface le storage
