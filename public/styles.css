@@ -1,6 +1,6 @@
 /* ============================================================
    DecoShop — Generateur d'affiche A4 paysage
-   Direction artistique : navy (#1E3A8A) + jaune solaire
+   Direction artistique : navy (#0C54AF) + jaune solaire
    (#FACC15) sur fond creme (#FAF7F0). Editorial : Playfair
    Display pour la voix forte, DM Sans pour le rationnel.
    ============================================================ */
@@ -10,9 +10,9 @@
 
 :root {
   /* Palette */
-  --navy:        #1E3A8A;
-  --navy-700:    #1d3678;
-  --navy-50:     #eaf0fb;
+  --navy:        #0C54AF;
+  --navy-700:    #0a4793;
+  --navy-50:     #e7effa;
   --yellow:      #FACC15;
   --yellow-600:  #eab308;
   --cream:       #FAF7F0;
