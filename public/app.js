@@ -196,7 +196,7 @@
 
     // Footer mode (texte adapte si expo)
     const modeEl = clone.querySelector('[data-mode]');
-    if (modeEl) modeEl.textContent = data.expo ? 'Modele expose' : 'En magasin';
+    if (modeEl) modeEl.textContent = data.expo ? "Modele d'exposition" : 'En magasin';
 
     // QR code : générer si l'utilisateur a cliqué sur le bouton pour cette URL
     const qrSlot = clone.querySelector('[data-qr]');
