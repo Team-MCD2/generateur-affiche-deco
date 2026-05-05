@@ -896,7 +896,7 @@ body { margin: 0; padding: 0; }
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 10mm 8mm;
+  padding: 10mm 4mm;
   position: relative;
   text-align: center;
   z-index: 1;
@@ -928,14 +928,24 @@ body { margin: 0; padding: 0; }
   font-weight: 400;
   line-height: 0.9;
   color: var(--navy);
-  letter-spacing: 0.01em;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  width: 100%;
+  justify-content: center;
 }
-.poster__price-value {
-  font-size: 64mm;
+.poster__price-integer {
+  font-size: 52mm;
+}
+.poster__price-decimal {
+  font-size: 22mm;
+  align-self: flex-start;
+  margin-top: 8mm;
+  margin-left: -1mm;
 }
 .poster__price-currency {
-  font-size: 34mm;
+  font-size: 22mm;
   font-weight: 400;
+  margin-left: 1mm;
 }
 .poster__price-label {
   margin-top: 4mm;

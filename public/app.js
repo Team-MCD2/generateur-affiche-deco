@@ -169,9 +169,36 @@
       refEl.style.display = 'none';
     }
 
-    // Prix actuel
-    clone.querySelector('[data-price]').textContent =
-      data.price != null ? fmtPrice(data.price) : '0';
+    // Prix actuel (separe en entier/decimal)
+    const priceIntEl = clone.querySelector('[data-price-int]');
+    const priceDecEl = clone.querySelector('[data-price-dec]');
+    const priceVal = data.price != null ? data.price : 0;
+    
+    // Formatage : on force 2 decimales si non-entier
+    const formatted = priceVal.toFixed(2).replace(/\.?0+$/, '');
+    const [intPart, decPart] = formatted.split('.');
+    
+    if (priceIntEl) priceIntEl.textContent = intPart;
+    if (priceDecEl) {
+      priceDecEl.textContent = decPart ? `,${decPart}` : '';
+    }
+
+    // Auto-shrink si le prix est trop long
+    const totalChars = intPart.length + (decPart ? decPart.length : 0);
+    const priceBlock = clone.querySelector('.poster__price');
+    
+    // On scale le font-size selon le nombre de caracteres reels
+    if (totalChars >= 7) {
+      priceBlock.style.fontSize = '0.45em';
+    } else if (totalChars >= 6) {
+      priceBlock.style.fontSize = '0.52em';
+    } else if (totalChars >= 5) {
+      priceBlock.style.fontSize = '0.65em';
+    } else if (totalChars >= 4) {
+      priceBlock.style.fontSize = '0.8em';
+    } else {
+      priceBlock.style.fontSize = '1em';
+    }
 
     // Prix avant promo (visible seulement si data.promo + valeur)
     const oldEl = clone.querySelector('[data-old]');
